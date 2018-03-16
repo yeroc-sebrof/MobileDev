@@ -11,4 +11,7 @@
     <string name="time_remaining">Time Remaining</string>
     <string name="stop_tracking">Stop Tracking</string>
     <string name="power_saving_mode">Power Saving Mode</string>
+    <string name="recording_active">Recording Active</string>
+    <string name="recording_settings">Recording Settings</string>
+    <string name="read_list_options">Read list options</string>
 </resources>

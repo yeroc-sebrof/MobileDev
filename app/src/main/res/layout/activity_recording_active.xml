@@ -15,7 +15,7 @@
         android:contentDescription="@string/captains_image"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/cpt" />
+        android:src="@drawable/cpt" />
 
     <TextView
         android:id="@+id/text_cpt_log"
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="48dp"
         android:text="@string/app_name"
         android:textAlignment="center"
         android:textSize="24sp"
@@ -32,14 +32,58 @@
         app:layout_constraintStart_toEndOf="@+id/img_cap"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/currentActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/recording_active"
+        app:layout_constraintEnd_toEndOf="@+id/text_cpt_log"
+        app:layout_constraintStart_toStartOf="@+id/text_cpt_log"
+        app:layout_constraintTop_toBottomOf="@+id/text_cpt_log" />
+
+    <TextView
+    android:id="@+id/text_time_remaining"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="48dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginStart="8dp"
+    android:text="@string/time_remaining"
+    android:textAlignment="center"
+    android:textSize="24sp"
+    app:layout_constraintBottom_toTopOf="@+id/btn_power_savings"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="0.0"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/img_cap" />
+
+    <TextView
+    android:id="@+id/time_remaining"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="48dp"
+    android:text="[DD:]HH:MM"
+    android:textAlignment="center"
+    android:textSize="24sp"
+    app:layout_constraintBottom_toTopOf="@+id/btn_power_savings"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/img_cap" />
+
     <Button
         android:id="@+id/btn_stop_tracking"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:text="@string/stop_tracking"
+        android:textColor="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -48,43 +92,13 @@
         android:id="@+id/btn_power_savings"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:text="@string/power_saving_mode"
-        app:layout_constraintBottom_toTopOf="@+id/btn_stop_tracking"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/time_remaining"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
-        android:text="[DD:]HH:MM"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_power_savings"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/img_cap" />
-
-    <TextView
-        android:id="@+id/text_time_remaining"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="@string/time_remaining"
-        android:textAlignment="center"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_power_savings"
+        android:text="@string/power_saving_mode"
+        android:textColor="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@+id/btn_stop_tracking"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/img_cap" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
