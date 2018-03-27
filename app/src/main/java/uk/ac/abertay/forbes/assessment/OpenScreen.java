@@ -1,29 +1,27 @@
 package uk.ac.abertay.forbes.assessment;
 
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQuery;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 public class OpenScreen extends AppCompatActivity {
 
+    /*
     @Override
     protected void onDestroy() {
         //String = SQLiteDatabase.execSQL("DROP DATABASE logs");
         super.onDestroy();
     }
+    */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Poke the database table to life or to wake it up
-        //SQLiteDatabase.openOrCreateDatabase("Logs", null).close();
-
         /* try {
             setContentView(R.layout.activity_open_screen);
             wait(1500);
@@ -32,15 +30,18 @@ public class OpenScreen extends AppCompatActivity {
         } */
 
         setContentView(R.layout.activity_main_menu);
+        Log.d("Main Menu", "Successful Launch");
     }
 
     public void make(View view) {
-        Intent intent = new Intent(this, RecordOptions.class);
+        Intent intent = new Intent(this, Record.class);
+        Log.d("Main Menu", "New Log Pushed");
         startActivity(intent);
     }
 
     public void read(View view) {
         Intent intent = new Intent(this, ReadOptions.class);
+        Log.d("Main Menu", "Review Log Pushed");
         startActivity(intent);
     }
 }

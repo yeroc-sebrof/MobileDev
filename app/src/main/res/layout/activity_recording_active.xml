@@ -84,7 +84,7 @@
         android:layout_marginStart="16dp"
         android:onClick="stopRecording"
         android:text="@string/stop_tracking"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/captains_yellow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -97,7 +97,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:text="@string/power_saving_mode"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/captains_yellow"
         app:layout_constraintBottom_toTopOf="@+id/btn_stop_tracking"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

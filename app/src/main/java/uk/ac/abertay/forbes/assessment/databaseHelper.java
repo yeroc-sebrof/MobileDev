@@ -23,7 +23,7 @@ public class databaseHelper extends SQLiteOpenHelper {
     private static final String HANDLER_COLUMN_LOG = "log";
     private static final String HANDLER_COLUMN_TIMESTAMP = "timestamp";
 
-    private databaseHelper(Context context) {
+    databaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

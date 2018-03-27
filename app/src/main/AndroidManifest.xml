@@ -17,15 +17,11 @@
             </intent-filter>
         </activity>
 
-        <!--
         <activity android:name=".ReadOptions"></activity>
 
         <activity android:name=".ReadingLog"></activity>
 
-        <activity android:name=".RecordOptions"></activity>
-
-        <activity android:name=".RecordingActive"></activity>
-        -->
+        <activity android:name=".Record"></activity>
 
     </application>
 

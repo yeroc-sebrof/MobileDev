@@ -3,15 +3,25 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
+        <item name="colorPrimaryDark">@color/captains_yellow</item>
+        <item name="colorAccent">@color/captains_blue</item>
+
+        <item name="android:windowBackground">@color/captains_yellow</item>
         <item name="android:windowEnterTransition">@android:transition/no_transition</item>
         <item name="android:windowExitTransition">@android:transition/no_transition</item>
 
-        <item name="colorPrimaryDark">@color/colorSecondary</item>
-        <item name="colorAccent">@color/colorButtonBack</item>
+        <item name="colorPrimary">@color/captains_red</item>
 
-        <item name="android:background">@color/colorPrimary</item>
-        <item name="android:textColor">@color/colorSecondary</item>
-        <item name="android:colorButtonNormal">@color/colorButtonBack</item>
+        <item name="android:textColor">@color/captains_red</item>
+
+        <item name="android:navigationBarColor">@android:color/background_dark</item>
+        <item name="android:colorButtonNormal">@color/captains_blue</item>
+        <item name="android:colorBackground">@color/captains_red</item>
+
+        <!-- This is needed for TimePickerDialog -->
+        <!--<item name="android:dialogTheme">FIX ME</item>-->
     </style>
+
+
 
 </resources>

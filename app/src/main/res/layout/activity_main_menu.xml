@@ -36,7 +36,7 @@
         android:layout_marginStart="16dp"
         android:onClick="make"
         android:text="@string/new_log"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/captains_yellow"
         app:layout_constraintBottom_toTopOf="@+id/btn_review_log"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -51,7 +51,7 @@
         android:layout_marginStart="16dp"
         android:onClick="read"
         android:text="@string/review_log"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/captains_yellow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
