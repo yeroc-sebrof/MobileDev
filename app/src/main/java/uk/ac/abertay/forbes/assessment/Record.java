@@ -2,7 +2,7 @@ package uk.ac.abertay.forbes.assessment;
 
 import android.app.Activity;
 import android.app.TimePickerDialog;
-import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,7 +15,8 @@ import java.util.Calendar;
 public class Record extends Activity {
     TextView time_end;
     final String time_default = "04:00";
-    String time = "04:00";
+    String time = time_default;
+    Boolean moreMoreOptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,19 +25,17 @@ public class Record extends Activity {
 
         time_end = findViewById(R.id.txt_end_at);
         time_end.setText(time_default);
-        Log.d("Record Options", "Set Time to " + time_default);
-
-        Intent intent = getIntent();
+        moreMoreOptions = getIntent().getExtras().getBoolean("debug");
 
         Log.d("Record Options", "Successful Launch");
     }
 
-    public void endTime(View view) {
+    public void endAt(View view) {
         Calendar currentTimes = Calendar.getInstance();
 
         final int hour = currentTimes.get(Calendar.HOUR_OF_DAY);
         final int minute = currentTimes.get(Calendar.MINUTE);
-        Log.d("Record Options", "Variables set");
+        Log.d("Record Options", "Current Time - " + hour + ":" + minute);
 
         TimePickerDialog timePicker =
                 new TimePickerDialog(this, R.style.AppThemeDialog, new TimePickerDialog.OnTimeSetListener() {
@@ -69,23 +68,50 @@ public class Record extends Activity {
         // Start thread for tracking action
         // startTracking(time_end content)
 
+        // tick the clock
+
         setContentView(R.layout.activity_recording_active);
     }
 
-
-    public void startTracking(View view) {
-        // tick the clock
-        // track the users location
-            // add points to log
-        // track telephony
-            // this should be a listener for activities
-
-        // Make sure the SQLite database is being added to as this goes and not left as one big data dump
-    }
+    // Start recording service pseudo code
+        // 1 tick the clock
+        // 2 track the users location
+            // 2.1 add points to log every x min
+        // 3 listen for telephony
+            // 3.1 this should be a listener for activities SMS and CALLS
+        // 4 Make sure 1-3 correctly write to SQLite database as we run
+            // 4.1 Make sure we write all Content correctly with JSON
+            // https://www.w3schools.com/js/js_json_stringify.asp and
+            // https://www.javacodegeeks.com/2013/10/android-json-tutorial-create-and-parse-json-data.html
 
     public void stopRecording(View view) {
+        // Stop the service from running
+
         // Back off this Activity
         this.finish();
+    }
+
+    public void debugMakeItemInLog(View view) {
+        Log.d("Record Options", "Debug Make log action Called");
+
+        databaseHelper debugHelp = new databaseHelper(this);
+        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
+                MODE_PRIVATE, null);
+        Log.d("Record Options", "Database connection established");
+
+        Cursor temp = debugHelp.lastItemInLogIndex(debugDatabase);
+        temp.moveToNext();
+
+        debugHelp.newActivity(debugDatabase, temp.getInt(0), 1,
+                "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":false,\n\t\"start\":\"Alpha\",\n\t\"end\":\"Omega\"\n}");
+
+        debugHelp.newActivity(debugDatabase, temp.getInt(0), 2,
+                "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":false,\n\t\"content\":\"Get a bottle of Morgans on the way back\"\n}");
+
+        debugHelp.newActivity(debugDatabase, temp.getInt(0), 2,
+                "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":true,\n\t\"content\":\"Of Course!\"\n}");
+
+        Log.d("Record Options", "Debug logs made");
     }
 
     public void debugMakeLogs(View view) {
@@ -96,7 +122,7 @@ public class Record extends Activity {
                                                                         MODE_PRIVATE, null);
         Log.d("Record Options", "Database connection established");
 
-        debugHelp.makeNewLog(debugDatabase, "Broken Query testing");
+        debugHelp.makeNewLog(debugDatabase, "fake news");
         Log.d("Record Options", "Debug logs made");
     }
 }
