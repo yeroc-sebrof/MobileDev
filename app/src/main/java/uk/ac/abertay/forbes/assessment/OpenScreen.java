@@ -8,16 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 public class OpenScreen extends AppCompatActivity {
-
-    /*
-    @Override
-    protected void onDestroy() {
-        //String = SQLiteDatabase.execSQL("DROP DATABASE logs");
-        super.onDestroy();
-    }
-    */
+    int debug = 0;
+    boolean debugActive = Boolean.FALSE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +30,7 @@ public class OpenScreen extends AppCompatActivity {
 
     public void make(View view) {
         Intent intent = new Intent(this, Record.class);
+        intent.putExtra("debug", debugActive);
         Log.d("Main Menu", "New Log Pushed");
         startActivity(intent);
     }
@@ -43,5 +39,14 @@ public class OpenScreen extends AppCompatActivity {
         Intent intent = new Intent(this, ReadOptions.class);
         Log.d("Main Menu", "Review Log Pushed");
         startActivity(intent);
+    }
+
+    public void debugPoke (View view) {
+        debug++;
+        if (debug > 10) {
+            Toast.makeText(getApplicationContext(),"Debug gestures are active", Toast.LENGTH_LONG)
+                    .show();
+            debugActive = Boolean.TRUE;
+        }
     }
 }
