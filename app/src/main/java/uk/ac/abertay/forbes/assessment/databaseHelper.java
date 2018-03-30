@@ -31,7 +31,7 @@ public class databaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_CONTENT = "content";
 
     // So the storage in the db just has to be a int it will be pulled and the type will be TYPES[<db int>]
-    private static final String[] TYPES = {"GPS", "Phone Call", "SMS"};
+    public final String[] TYPES = {"GPS", "Phone Call", "SMS"};
 
     databaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -80,6 +80,12 @@ public class databaseHelper extends SQLiteOpenHelper {
                 null);
     }
 
+    public Cursor lastItemInLogIndex (SQLiteDatabase db) {
+        return db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID},
+                null, null, null, null,
+                COLUMN_ID + " DESC", "1");
+    }
+
     public void makeNewLog(SQLiteDatabase db, String name) {
         Log.d("Database Helper", "Make new log called");
 
@@ -93,9 +99,7 @@ public class databaseHelper extends SQLiteOpenHelper {
         Log.d("Database Helper", "Value Inserted to Index");
 
         // Query to get the new Log ID to work with
-        final Cursor logNo = db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID},
-                null, null, null, null,
-                COLUMN_ID + " DESC", "1");
+        final Cursor logNo = lastItemInLogIndex(db);
         logNo.moveToFirst();
 
         // Make a new log table
@@ -112,8 +116,11 @@ public class databaseHelper extends SQLiteOpenHelper {
         Log.d("Database Helper", "Done making new log");
     }
 
-    public void newActivity (SQLiteDatabase db, int id) {
-        db.insert(LOG + id, null, null);
+    public void newActivity (SQLiteDatabase db, int id, int type, String content) {
+        ContentValues insertValue = new ContentValues(0);
+        insertValue.put(COLUMN_TYPE, type);
+        insertValue.put(COLUMN_CONTENT, content);
+        db.insert(LOG + id, null, insertValue);
     }
 
     public void deleteLog(SQLiteDatabase db, int id) {

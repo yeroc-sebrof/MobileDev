@@ -51,7 +51,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
-        android:onClick="endTime"
+        android:onClick="endAt"
         android:text="@string/end_at"
         android:textColor="@color/captains_yellow"
         app:layout_constraintBottom_toTopOf="@+id/btn_start_tracking"
