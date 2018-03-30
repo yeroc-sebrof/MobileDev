@@ -2,11 +2,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.ac.abertay.forbes.assessment">
 
+    <uses-feature android:name="android.hardware.location"/>
+    <uses-feature android:name="android.hardware.location.gps"/> <!-- SUB API 20-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <uses-feature android:name="android.hardware.telephony"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/> <!-- This is only if log doesnt tell us what we need to know about calls -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.READ_SMS"/>
+
+    <uses-feature android:name="android.database"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/cpt"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:roundIcon="@drawable/cpt"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
@@ -17,11 +30,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ReadOptions"></activity>
+        <activity android:name=".Record"/>
 
-        <activity android:name=".ReadingLog"></activity>
+        <activity android:name=".ReadOptions"/>
 
-        <activity android:name=".Record"></activity>
+        <activity android:name=".ReadingLog"/>
 
     </application>
 

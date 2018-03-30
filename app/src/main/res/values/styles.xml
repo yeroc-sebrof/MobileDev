@@ -7,8 +7,6 @@
         <item name="colorAccent">@color/captains_blue</item>
 
         <item name="android:windowBackground">@color/captains_yellow</item>
-        <item name="android:windowEnterTransition">@android:transition/no_transition</item>
-        <item name="android:windowExitTransition">@android:transition/no_transition</item>
 
         <item name="colorPrimary">@color/captains_red</item>
 
@@ -19,9 +17,19 @@
         <item name="android:colorBackground">@color/captains_red</item>
 
         <!-- This is needed for TimePickerDialog -->
-        <!--<item name="android:dialogTheme">FIX ME</item>-->
+        <item name="android:dialogTheme">@style/AppThemeDialog</item>
     </style>
 
+    <style name="AppThemeDialog" parent="android:Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" >
+        <!--Overwrite text colour from above-->
+        <item name="android:textColor">@color/captains_yellow</item>
 
+        <item name="android:colorAccent">@color/captains_red</item>
+        <item name="android:textColorPrimary">@color/captains_yellow</item>
+        <item name="android:textColorSecondary">@color/captains_yellow</item>
+        <item name="android:textColorPrimaryInverse">@color/captains_yellow</item>
+        <item name="android:textColorSecondaryInverse">@color/captains_yellow</item>
+        <item name="android:colorForeground">@color/captains_yellow</item>
+    </style>
 
 </resources>

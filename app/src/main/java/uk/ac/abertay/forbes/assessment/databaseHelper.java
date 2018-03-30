@@ -1,9 +1,14 @@
 package uk.ac.abertay.forbes.assessment;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import java.lang.reflect.Array;
+import java.util.Dictionary;
 
 public class databaseHelper extends SQLiteOpenHelper {
 
@@ -18,10 +23,15 @@ public class databaseHelper extends SQLiteOpenHelper {
     private static final String HANDLER_TABLE_NAME = "logs";
 
     // Handle Table Columns
-    // Tables will be created == HANDLER_COLUMN_LOG + id
-    private static final String HANDLER_COLUMN_ID = "id";
-    private static final String HANDLER_COLUMN_LOG = "log";
-    private static final String HANDLER_COLUMN_TIMESTAMP = "timestamp";
+    // Tables will be created == LOG + id
+    private static final String COLUMN_ID = "id";
+    private static final String LOG = "log";
+    private static final String COLUMN_TIMESTAMP = "timestamp";
+    private static final String COLUMN_TYPE = "type";
+    private static final String COLUMN_CONTENT = "content";
+
+    // So the storage in the db just has to be a int it will be pulled and the type will be TYPES[<db int>]
+    private static final String[] TYPES = {"GPS", "Phone Call", "SMS"};
 
     databaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -32,10 +42,10 @@ public class databaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // Create table SQL query
         String CREATE_HANDLER_TABLE =
-                "CREATE TABLE IF NOT EXISTS" + HANDLER_TABLE_NAME + "("
-                        + HANDLER_COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        + HANDLER_COLUMN_LOG + " TEXT,"
-                        + HANDLER_COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
+                "CREATE TABLE IF NOT EXISTS " + HANDLER_TABLE_NAME + "("
+                        + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                        + LOG + " TINYTEXT,"
+                        + COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
                         + ");";
 
         // create handler table (logs)
@@ -58,58 +68,61 @@ public class databaseHelper extends SQLiteOpenHelper {
         // Transfer Data from old table
         // TODO when relevant
     }
-/*
-    public Cursor readLog(SQLiteDatabase db, String id) { // TODO
-        String tablename = HANDLER_COLUMN_LOG + id;
 
-        return db.query(tablename, TODO, null, null, null, null, TODO, null);
+    public Cursor readLog(SQLiteDatabase db, int id) {
+        return db.query(LOG + id, new String[] {COLUMN_TYPE, COLUMN_CONTENT}, null, null, null, null, COLUMN_ID + " ASC", null);
     }
-*/
-    public Cursor readLogs(SQLiteDatabase db) { // TODO
-        String[] Columns = new String[2];
-        Columns[0] = HANDLER_COLUMN_ID;
-        Columns[1] = HANDLER_COLUMN_LOG;
 
-        return db.query(HANDLER_TABLE_NAME, Columns,
+    public Cursor readLogs(SQLiteDatabase db) { // TODO
+        return db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID, LOG},
                 null, null, null, null,
-                HANDLER_COLUMN_ID + " ASC",
+                COLUMN_ID + " ASC",
                 null);
     }
 
-    private Cursor newLogIndex (SQLiteDatabase db, String name) {
+    public void makeNewLog(SQLiteDatabase db, String name) {
+        Log.d("Database Helper", "Make new log called");
+
         // For the sake of readability would prefer none to be null
         if (name.equals("")) { name = null; }
 
-        // Make new entry in the log table
-        String makeIndexEntry = "INSERT INTO " + HANDLER_TABLE_NAME +
-                           "(" + HANDLER_COLUMN_LOG + ")" +
-                           "VALUES (" + name + ");";
+        ContentValues insertValue = new ContentValues(0);
+        insertValue.put(LOG, name);
+        db.insert(HANDLER_TABLE_NAME, null, insertValue);
 
-        db.execSQL(makeIndexEntry);
+        Log.d("Database Helper", "Value Inserted to Index");
 
-        // For Columns Array is required
-        String[] Columns = new String[1];
-        Columns[0] = HANDLER_COLUMN_ID;
-
-        // Return a cursor with one item that it points to
-        return db.query(HANDLER_TABLE_NAME, Columns,
+        // Query to get the new Log ID to work with
+        final Cursor logNo = db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID},
                 null, null, null, null,
-                HANDLER_COLUMN_ID + " DESC", "1");
-    }
+                COLUMN_ID + " DESC", "1");
+        logNo.moveToFirst();
 
-    public void makeNewLog(SQLiteDatabase db, String name) {
         // Make a new log table
-        Cursor logNo = this.newLogIndex(db, name);
+        String CREATE_LOG = "CREATE TABLE IF NOT EXISTS " + LOG + logNo.getString(0) + "( "
+                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_TYPE + " INT NOT NULL,"
+                + COLUMN_CONTENT + " TEXT NOT NULL"
+                + ");";
 
-        String CREATE_LOG = "CREATE TABLE " + HANDLER_COLUMN_LOG + logNo.getString(0) + ";";
+        Log.d("Database Helper", "Executing: " + CREATE_LOG);
 
         db.execSQL(CREATE_LOG);
+        logNo.close();
+        Log.d("Database Helper", "Done making new log");
+    }
+
+    public void newActivity (SQLiteDatabase db, int id) {
+        db.insert(LOG + id, null, null);
     }
 
     public void deleteLog(SQLiteDatabase db, int id) {
-        String del = "DROP TABLE IF EXISTS " + HANDLER_COLUMN_LOG + id + ";";
-
+        String del = "DROP TABLE IF EXISTS " + LOG + id + ";";
         db.execSQL(del);
+        Log.d("Database Helper", "Dropped Table Log " + id);
+
+        db.delete(HANDLER_TABLE_NAME, COLUMN_ID + "=" + id, null);
+        Log.d("Database Helper", "Removed Index ID " + id);
     }
 
     public String getDatabaseName()

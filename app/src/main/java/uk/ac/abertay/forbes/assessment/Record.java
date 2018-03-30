@@ -3,6 +3,7 @@ package uk.ac.abertay.forbes.assessment;
 import android.app.Activity;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -38,21 +39,27 @@ public class Record extends Activity {
         Log.d("Record Options", "Variables set");
 
         TimePickerDialog timePicker =
-                new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+                new TimePickerDialog(this, R.style.AppThemeDialog, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int sel_hour, int sel_minute) {
-                        if (sel_minute < 10) {
-                            time = sel_hour + ":0" + sel_minute;
+                        if (sel_hour < 10) {
+                            time = "0" + sel_hour;
                         }
                         else {
-                            time = sel_hour + ":" + sel_minute;
+                            time = "" + sel_hour;
                         }
+
+                        if (sel_minute < 10) {
+                            time += ":0" + sel_minute;
+                        }
+                        else {
+                            time += ":" + sel_minute;
+                        }
+
                         time_end.setText(time);
                         Log.d("Record Options", "Time Picker Done : " + time);
                     }
                 }, hour, minute, true);
-
-        timePicker.setTitle("End Time");
 
         timePicker.show();
         Log.d("Record Options", "Time Picker Dialog displayed");
@@ -77,9 +84,19 @@ public class Record extends Activity {
     }
 
     public void stopRecording(View view) {
-        setContentView(R.layout.activity_record_options);
-
         // Back off this Activity
+        this.finish();
+    }
 
+    public void debugMakeLogs(View view) {
+        Log.d("Record Options", "Debug Make logs Called");
+
+        databaseHelper debugHelp = new databaseHelper(this);
+        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
+                                                                        MODE_PRIVATE, null);
+        Log.d("Record Options", "Database connection established");
+
+        debugHelp.makeNewLog(debugDatabase, "Broken Query testing");
+        Log.d("Record Options", "Debug logs made");
     }
 }
