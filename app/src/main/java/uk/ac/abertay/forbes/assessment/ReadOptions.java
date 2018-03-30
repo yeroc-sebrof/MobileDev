@@ -16,6 +16,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO Make the list use subtitles instead https://youtu.be/VYDLTBjdliY
+
 public class ReadOptions extends Activity {
     boolean deleting = Boolean.FALSE,
             dummyMode;
