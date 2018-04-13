@@ -18,13 +18,13 @@ import java.util.List;
 
 // TODO Make the list use subtitles instead https://youtu.be/VYDLTBjdliY
 
-public class ReadOptions extends Activity {
+public class ReadLogs extends Activity {
     boolean deleting = Boolean.FALSE,
             dummyMode;
 
     Button delLogs;
 
-    databaseHelper dh = new databaseHelper(this);
+    asyncDatabaseHelper dh = new asyncDatabaseHelper(this);
     SQLiteDatabase db;
     Cursor logs;
 
