@@ -70,44 +70,13 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
                 null);
     }
 
-    public Cursor lastItemInLogIndex (SQLiteDatabase db) {
-        return db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID},
-                null, null, null, null,
-                COLUMN_ID + " DESC", "1");
-    }
-
     public void makeNewLog(SQLiteDatabase db, String name) {
-        Log.d("Database Helper", "Make new log called");
-
-        // For the sake of readability would prefer none to be null
-        if (name.equals("")) { name = null; }
-
-        ContentValues insertValue = new ContentValues(0);
-        insertValue.put(LOG, name);
-        db.insert(HANDLER_TABLE_NAME, null, insertValue);
-
-        Log.d("Database Helper", "Value Inserted to Index");
-
-        // Query to get the new Log ID to work with
-        final Cursor logNo = lastItemInLogIndex(db);
-        logNo.moveToFirst();
-
-        // Make a new log table
-        String CREATE_LOG = "CREATE TABLE IF NOT EXISTS " + LOG + logNo.getString(0) + "( "
-                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + COLUMN_TYPE + " INT NOT NULL,"
-                + COLUMN_CONTENT + " TEXT NOT NULL, "
-                + COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
-                + ");";
-
-        Log.d("Database Helper", "Executing: " + CREATE_LOG);
-
-        db.execSQL(CREATE_LOG);
-        logNo.close();
-        Log.d("Database Helper", "Done making new log");
+        asyncNewLog asyncTask = new asyncNewLog(db, name);
+        asyncTask.doInBackground();
     }
 
     public void newActivity (SQLiteDatabase db, int id, int type, String content) {
+        // If this is being called in a activity does it need to be made async?
         ContentValues insertValue = new ContentValues(0);
         insertValue.put(COLUMN_TYPE, type);
         insertValue.put(COLUMN_CONTENT, content);
@@ -115,12 +84,8 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void deleteLog(SQLiteDatabase db, int id) {
-        String del = "DROP TABLE IF EXISTS " + LOG + id + ";";
-        db.execSQL(del);
-        Log.d("Database Helper","Dropped Table Log " + id);
-
-        db.delete(HANDLER_TABLE_NAME, COLUMN_ID + "=" + id, null);
-        Log.d("Database Helper","Removed Index ID " + id);
+        asyncDelLog asyncTask = new asyncDelLog(db);
+        asyncTask.doInBackground(id);
     }
 
     public String getDatabaseName()
@@ -128,10 +93,10 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
 }
 
 class asyncOnCreate extends AsyncTask<Void, Void, Void> {
-SQLiteDatabase db;
-
+    private SQLiteDatabase db;
     asyncOnCreate(SQLiteDatabase database)
     {
+        Log.d("Database Helper", "On create task created");
         db = database;
     }
 
@@ -144,42 +109,77 @@ SQLiteDatabase db;
                         + asyncDatabaseHelper.COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
                         + ");";
 
-            db.execSQL(CREATE_HANDLER_TABLE);
-            return null;
-        }
-}
-
-
-/* OLD CODE
-public class DatabaseHelper extends SQLiteOpenHelper {
-
-    // Database Version
-    private static final int DATABASE_VERSION = 1;
-
-    // Database Name
-    private static final String DATABASE_NAME = "notes_db";
-
-
-    public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
-
-    // Creating Tables
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-
-        // create notes table
-        db.execSQL(Logs.CREATE_TABLE);
-    }
-
-    // Upgrading database
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Drop older table if existed
-        db.execSQL("DROP TABLE IF EXISTS " + Logs.TABLE_NAME);
-
-        // Create tables again
-        onCreate(db);
+        db.execSQL(CREATE_HANDLER_TABLE);
+        return null;
     }
 }
- */
+
+class asyncDelLog extends AsyncTask<Integer, Void, Void> {
+    private SQLiteDatabase db;
+    asyncDelLog(SQLiteDatabase database)
+    {
+        Log.d("Database Helper", "Delete Log created");
+        db = database;
+    }
+
+    @Override
+    protected Void doInBackground(Integer... ints) {
+        String del = "DROP TABLE IF EXISTS " + asyncDatabaseHelper.LOG + ints[0] + ";";
+        db.execSQL(del);
+        Log.d("Database Helper","Dropped Table Log " + ints[0]);
+
+        db.delete(asyncDatabaseHelper.HANDLER_TABLE_NAME,
+                asyncDatabaseHelper.COLUMN_ID + "=" + ints[0],
+                null);
+        Log.d("Database Helper","Removed Index ID " + ints[0]);
+
+        return null;
+    }
+}
+
+class asyncNewLog extends AsyncTask<Void, Void, Void> {
+    private SQLiteDatabase db;
+    private ContentValues insertValue = new ContentValues(0);
+
+    asyncNewLog(SQLiteDatabase database, String name)
+    {
+        Log.d("Database Helper", "Make new log created");
+        db = database;
+
+        // For the sake of readability would prefer none to be null
+        if (name.equals("")) { name = null; }
+        insertValue.put(asyncDatabaseHelper.LOG, name);
+        Log.d("Database Helper", "Value Inserted to Index");
+    }
+
+    @Override
+    protected Void doInBackground(Void... voids) {
+        Log.d("Database Helper", "Make new log called");
+        db.insert(asyncDatabaseHelper.HANDLER_TABLE_NAME,
+                null,
+                insertValue);
+        Log.d("Database Helper", "Value Inserted to Index");
+
+        // Query to get the new Log ID to work with
+        final Cursor logNo = db.query(asyncDatabaseHelper.HANDLER_TABLE_NAME,
+                new String[]{asyncDatabaseHelper.COLUMN_ID},
+                null, null, null, null,
+                asyncDatabaseHelper.COLUMN_ID + " DESC", "1");
+        logNo.moveToFirst();
+
+        // Make a new log table
+        String CREATE_LOG = "CREATE TABLE IF NOT EXISTS " + asyncDatabaseHelper.LOG + logNo.getString(0)
+                + "( "
+                + asyncDatabaseHelper.COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + asyncDatabaseHelper.COLUMN_TYPE + " INT NOT NULL,"
+                + asyncDatabaseHelper.COLUMN_CONTENT + " TEXT NOT NULL, "
+                + asyncDatabaseHelper.COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
+                + ");";
+        Log.d("Database Helper", "Executing: " + CREATE_LOG);
+
+        db.execSQL(CREATE_LOG);
+        logNo.close();
+        Log.d("Database Helper", "Done making new log");
+        return null;
+    }
+}
