@@ -14,9 +14,8 @@ import java.util.Calendar;
 
 public class Record extends Activity {
     TextView time_end;
-    final String time_default = "04:00";
-    String time = time_default;
-    Boolean moreMoreOptions;
+    String time = "04:00";
+    Boolean debug;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +23,10 @@ public class Record extends Activity {
         setContentView(R.layout.activity_record_options);
 
         time_end = findViewById(R.id.txt_end_at);
-        time_end.setText(time_default);
-        moreMoreOptions = getIntent().getExtras().getBoolean("debug");
+        time_end.setText(time);
+
+        // Error here is null as debug will always be passed
+        debug = getIntent().getExtras().getBoolean("debug");
 
         Log.d("Record Options", "Successful Launch");
     }
@@ -65,12 +66,19 @@ public class Record extends Activity {
     }
 
     public void startRecording(View view) {
+        TextView timeRemianing = findViewById(R.id.time_remaining);
+
         // Start thread for tracking action
-        // startTracking(time_end content)
+        // trackingService(time_end content)
 
         // tick the clock
 
         setContentView(R.layout.activity_recording_active);
+
+    }
+
+    private void trackingService () {
+
     }
 
     // Start recording service pseudo code
@@ -94,7 +102,7 @@ public class Record extends Activity {
     public void debugMakeItemInLog(View view) {
         Log.d("Record Options", "Debug Make log action Called");
 
-        databaseHelper debugHelp = new databaseHelper(this);
+        asyncDatabaseHelper debugHelp = new asyncDatabaseHelper(this);
         SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
                 MODE_PRIVATE, null);
         Log.d("Record Options", "Database connection established");
@@ -117,7 +125,7 @@ public class Record extends Activity {
     public void debugMakeLogs(View view) {
         Log.d("Record Options", "Debug Make logs Called");
 
-        databaseHelper debugHelp = new databaseHelper(this);
+        asyncDatabaseHelper debugHelp = new asyncDatabaseHelper(this);
         SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
                                                                         MODE_PRIVATE, null);
         Log.d("Record Options", "Database connection established");
