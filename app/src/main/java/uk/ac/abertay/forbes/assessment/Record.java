@@ -1,12 +1,15 @@
 package uk.ac.abertay.forbes.assessment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.ScaleAnimation;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -99,6 +102,33 @@ public class Record extends Activity {
         this.finish();
     }
 
+    public void moreOptions(View view) {
+        if (debug) {
+            debugMakeLogs(view);
+        }
+        else
+        {
+            // Make a dialog with more_options_dialog.xml
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppThemeDialog);
+
+            builder.setTitle(R.string.more_options)
+                    .setView(R.layout.more_options_dialog);
+
+            AlertDialog dialog = builder.create();
+
+            dialog.show();
+        }
+    }
+
+    public void powerSavings(View view) {
+        if (debug) {
+            debugMakeItemInLog(view);
+        }
+        else{
+            // Change the time between GPS pings to 5 or 6 min
+        }
+    }
+
     public void debugMakeItemInLog(View view) {
         Log.d("Record Options", "Debug Make log action Called");
 
@@ -107,17 +137,7 @@ public class Record extends Activity {
                 MODE_PRIVATE, null);
         Log.d("Record Options", "Database connection established");
 
-        Cursor temp = debugHelp.lastItemInLogIndex(debugDatabase);
-        temp.moveToNext();
-
-        debugHelp.newActivity(debugDatabase, temp.getInt(0), 1,
-                "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":false,\n\t\"start\":\"Alpha\",\n\t\"end\":\"Omega\"\n}");
-
-        debugHelp.newActivity(debugDatabase, temp.getInt(0), 2,
-                "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":false,\n\t\"content\":\"Get a bottle of Morgans on the way back\"\n}");
-
-        debugHelp.newActivity(debugDatabase, temp.getInt(0), 2,
-                "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":true,\n\t\"content\":\"Of Course!\"\n}");
+        debugHelp.lastItemInLogIndex(debugDatabase);
 
         Log.d("Record Options", "Debug logs made");
     }
