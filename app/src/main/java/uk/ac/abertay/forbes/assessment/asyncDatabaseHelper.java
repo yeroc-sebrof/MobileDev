@@ -38,36 +38,33 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
     // Create Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
-    asyncOnCreate test = new asyncOnCreate(db);
-    test.execute();
+    asyncOnCreate asyncTask = new asyncOnCreate(db);
+    asyncTask.execute();
     }
 
     // Upgrade method to improve usability
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Make sure there's not a old table to interupt this process
-        db.execSQL("DROP TABLE IF EXISTS " + HANDLER_TABLE_NAME + "_OLD;");
+        asyncOnUpgrade asyncTask = new asyncOnUpgrade(db);
+        asyncTask.doInBackground();
 
-        // Rename table
-        db.execSQL("ALTER TABLE " + HANDLER_TABLE_NAME +
-                  " RENAME TO " + HANDLER_TABLE_NAME + "_OLD;");
-
-        // Create tables again
         onCreate(db);
-
-        // Transfer Data from old table
-        // TODO when relevant
     }
 
     public Cursor readLog(SQLiteDatabase db, int id) {
-        return db.query(LOG + id, new String[] {COLUMN_TYPE, COLUMN_CONTENT, COLUMN_TIMESTAMP}, null, null, null, null, COLUMN_ID + " ASC", null);
+        asyncReadLog asyncTask = new asyncReadLog(db);
+        return asyncTask.doInBackground(id);
     }
 
     public Cursor readLogs(SQLiteDatabase db) {
-        return db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID, LOG, COLUMN_TIMESTAMP},
-                null, null, null, null,
-                COLUMN_ID + " ASC",
-                null);
+        // This is now Significantly slower than without async. Will continue to async all tasks tho
+        asyncReadLogs asyncTask = new asyncReadLogs(db);
+        return asyncTask.doInBackground();
+    }
+
+    public Cursor lastItemInLogIndex (SQLiteDatabase db) {
+        readIndexLastLog asyncTask = new readIndexLastLog(db);
+        return asyncTask.doInBackground();
     }
 
     public void makeNewLog(SQLiteDatabase db, String name) {
@@ -76,7 +73,7 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void newActivity (SQLiteDatabase db, int id, int type, String content) {
-        // If this is being called in a activity does it need to be made async?
+        // If this should only be called in a activity does it need to be made async?
         ContentValues insertValue = new ContentValues(0);
         insertValue.put(COLUMN_TYPE, type);
         insertValue.put(COLUMN_CONTENT, content);
@@ -90,6 +87,88 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
 
     public String getDatabaseName()
     { return DATABASE_NAME; }
+}
+
+class asyncOnUpgrade extends AsyncTask<Void, Void, Void> {
+    private SQLiteDatabase db;
+    asyncOnUpgrade(SQLiteDatabase database)
+    {
+        Log.d("Database Helper", "ReadLogs task created");
+        db = database;
+    }
+
+    @Override
+    protected Void doInBackground(Void... voids) {
+        // Make sure there's not a old table to interupt this process
+        db.execSQL("DROP TABLE IF EXISTS " + asyncDatabaseHelper.HANDLER_TABLE_NAME + "_OLD;");
+
+        // Rename table
+        db.execSQL("ALTER TABLE " + asyncDatabaseHelper.HANDLER_TABLE_NAME +
+                " RENAME TO " + asyncDatabaseHelper.HANDLER_TABLE_NAME + "_OLD;");
+
+        // Transfer Data from old table
+        // TODO when relevant
+
+        return null;
+    }
+}
+
+class readIndexLastLog extends AsyncTask<Void, Void, Cursor> {
+    private SQLiteDatabase db;
+    readIndexLastLog(SQLiteDatabase database)
+    {
+        Log.d("Database Helper", "ReadLogs task created");
+        db = database;
+    }
+
+    @Override
+    protected Cursor doInBackground(Void... voids) {
+        return db.query(asyncDatabaseHelper.HANDLER_TABLE_NAME,
+                new String[]{asyncDatabaseHelper.COLUMN_ID},
+                null, null, null, null,
+                asyncDatabaseHelper.COLUMN_ID + " DESC",
+                "1");
+    }
+}
+
+class asyncReadLog extends AsyncTask<Integer, Void, Cursor> {
+    private SQLiteDatabase db;
+    asyncReadLog(SQLiteDatabase database)
+    {
+        Log.d("Database Helper", "ReadLog task created");
+        db = database;
+    }
+
+    @Override
+    protected Cursor doInBackground(Integer... ints) {
+        return db.query(asyncDatabaseHelper.LOG + ints[0],
+                new String[] {asyncDatabaseHelper.COLUMN_TYPE,
+                              asyncDatabaseHelper.COLUMN_CONTENT,
+                              asyncDatabaseHelper.COLUMN_TIMESTAMP},
+                null, null, null, null,
+                asyncDatabaseHelper.COLUMN_ID + " ASC",
+                null);
+    }
+}
+
+class asyncReadLogs extends AsyncTask<Void, Void, Cursor> {
+    private SQLiteDatabase db;
+    asyncReadLogs(SQLiteDatabase database)
+    {
+        Log.d("Database Helper", "ReadLogs task created");
+        db = database;
+    }
+
+    @Override
+    protected Cursor doInBackground(Void... voids) {
+        return db.query(asyncDatabaseHelper.HANDLER_TABLE_NAME,
+                new String[]{asyncDatabaseHelper.COLUMN_ID,
+                             asyncDatabaseHelper.LOG,
+                             asyncDatabaseHelper.COLUMN_TIMESTAMP},
+                null, null, null, null,
+                asyncDatabaseHelper.COLUMN_ID + " ASC",
+                null);
+    }
 }
 
 class asyncOnCreate extends AsyncTask<Void, Void, Void> {
