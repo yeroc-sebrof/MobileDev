@@ -24,7 +24,7 @@ public class ReadingLog extends Activity {
     ListView logView;
     int log;
 
-    databaseHelper dh = new databaseHelper(this);
+    asyncDatabaseHelper dh = new asyncDatabaseHelper(this);
     SQLiteDatabase db;
     Cursor logOut;
 
@@ -134,7 +134,7 @@ public class ReadingLog extends Activity {
         JSONObject JSONParser;
 
         logOut.move(item);
-        String temp = "";
+        String content = "";
 
         try {
 
@@ -143,62 +143,64 @@ public class ReadingLog extends Activity {
             switch (logOut.getInt(0)) {
                 case 0:
                     try {
-                        temp = "Lat - " + JSONParser.getString("lat-float") +
+                        content = "Lat - " + JSONParser.getString("lat-float") +
                                 "\nLong - " + JSONParser.getString("long-float");
                     }
                     catch (Exception e) {
                         Log.d("Read Log", "Lat/Long didnt work");
-                        temp = "There was an error.\n Sorry!";
+                        content = "There was an error.\nSorry!  Err - 1";
                     }
                     break;
                 case 1:
                     try {
                         if (JSONParser.getBoolean("outbound")) {
-                            temp += "To - ";
+                            content += "To - ";
                         }
                         else {
-                            temp += "From - ";
+                            content += "From - ";
                         }
 
-                        temp += JSONParser.getString("contact");
+                        content += JSONParser.getString("contact") + "\n";
 
-                        temp+="\nCall Start - " + JSONParser.getString("start") +
+                        content+="\nCall Start - " + JSONParser.getString("start") +
                               "\nCall End - " + JSONParser.getString("end");
                     }
                     catch (Exception e) {
                         // This ones the most likely fuck up
                         Log.d("Read Log", "Contact/Outbound/Start/End didn't work");
-                        temp = "There was an error.\n Sorry!";
+                        content = "There was an error.\nSorry!  Err - 2";
                     }
                     break;
                 case 2:
                     try {
                         if (JSONParser.getBoolean("outbound")) {
-                            temp += "To - ";
+                            content += "To - ";
                         }
                         else {
-                            temp += "From - ";
+                            content += "From - ";
                         }
 
-                        temp += JSONParser.getString("contact");
+                        content += JSONParser.getString("contact") + "\n";
 
-                        temp+="\nContent:\n\n" + JSONParser.getString("content");
+                        content+="\nContent:\n\n" + JSONParser.getString("content");
                     }
                     catch (Exception e) {
                         Log.d("Read Log", "Contact/Outbound/Content didn't work");
-                        temp = "There was an error.\n Sorry!";
+                        content = "There was an error.\nSorry!  Err - 3";
                     }
                     break;
             }
+
+            content += "\n\n" + "Timestamp: " + logOut.getString(2);
         }
         catch (Exception e) {
             Log.d("Read Log", "Reading JSON failed - " + e.toString());
-            temp = "There was an error.\n Sorry!";
+            content = "There was an error.\nSorry!  Err - 4";
         }
 
         final AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppThemeDialog).create();
         dialog.setTitle(dh.TYPES[logOut.getInt(0)]);
-        dialog.setMessage(temp);
+        dialog.setMessage(content);
         dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Done",
                 new DialogInterface.OnClickListener() {
                     @Override
