@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -20,31 +21,25 @@ import java.util.List;
 
 
 public class ReadingLog extends Activity {
-    TextView readingLog;
-    ListView logView;
     int log;
+
+    TextView readingLog;
 
     asyncDatabaseHelper dh = new asyncDatabaseHelper(this);
     SQLiteDatabase db;
-    Cursor logOut;
+
+    ArrayAdapter<String> arrayAdapter;
+    ListView logV;
+
+    Cursor logCurr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading_log);
 
-        List<String> logViewValues = new ArrayList<String>();
-
+        logV = findViewById(R.id.log_view);
         readingLog = findViewById(R.id.txt_currentActivity);
-        logView = findViewById(R.id.log_view);
-
-        logView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
-                takeItemFurther(view, position);
-                return true;
-            }
-        });
 
         try {
             log = getIntent().getExtras().getInt("log");
@@ -53,7 +48,7 @@ public class ReadingLog extends Activity {
             readingLog.append(" Log " + log);
         }
         catch (Exception e) {
-            Log.e("Read Log", "getInt failed - " + e.toString());
+            Log.e("Read Log", "Intent failed to include an Int - " + e.toString());
             this.finish();
         }
 
@@ -61,36 +56,55 @@ public class ReadingLog extends Activity {
             db = this.openOrCreateDatabase(dh.getDatabaseName(), MODE_PRIVATE, null);
         }
         catch (Exception e) {
-            Log.e("Read Log", "Unable to read log - " + e.toString());
+            Log.e("Read Log", "How did you get this far and couldn't open a database - " + e.toString());
+            Toast.makeText(getApplicationContext(), "Unexpected error when opening a Database", Toast.LENGTH_LONG)
+                    .show();
             this.finish();
         }
 
-        logOut = dh.readLog(db, log);
-        logOut.moveToNext();
-
-        Log.d("Read Log", "Log output has " + logOut.getCount() + " items");
-
-        for (int x = logOut.getCount(); x > 0; x--) {
-                logViewValues.add(dh.TYPES[logOut.getInt(0)] + parseJson());
-                Log.d("Read Log", x-1 + " items remain");
-                logOut.moveToNext();
-        }
-
-        logOut.moveToFirst();
-
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>
-                (this, android.R.layout.simple_list_item_1, logViewValues);
-
-        logView.setAdapter(arrayAdapter);
+        dh.readLog(db, log,this);
 
         Log.d("Read Log", "Successful Launch");
+    }
+
+    public void startList(Cursor cursor) {
+        logCurr = cursor;
+
+        logCurr.moveToNext();
+
+        Log.d("Read Log", "Log output has " + logCurr.getCount() + " items");
+
+        List<String> logViewValues = new ArrayList<String>();
+
+        for (int x = logCurr.getCount(); x > 0; x--) {
+            logViewValues.add(dh.TYPES[logCurr.getInt(0)] + parseJson());
+            Log.d("Read Log", x-1 + " items remain");
+            logCurr.moveToNext();
+        }
+
+        logCurr.moveToFirst();
+
+        arrayAdapter = new ArrayAdapter<String>
+                (this, android.R.layout.simple_list_item_1, logViewValues);
+
+        logV.setAdapter(arrayAdapter);
+
+        logV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
+                takeItemFurther(view, position);
+                return true;
+            }
+        });
+
+        Log.d("Read Log", "Successful Database pull");
     }
 
     String parseJson () {
         JSONObject JSONFunctionParser;
 
         try {
-            JSONFunctionParser = new JSONObject(logOut.getString(1));
+            JSONFunctionParser = new JSONObject(logCurr.getString(1));
         }
         catch (Exception e){
             Log.d("Read Log", "Parser Broke - " + e.toString());
@@ -98,18 +112,18 @@ public class ReadingLog extends Activity {
         }
 
         try {
-            Log.d("Read Log", "Parsing JSON " + dh.TYPES[logOut.getInt(0)]);
+            Log.d("Read Log", "Parsing JSON " + dh.getTYPES()[logCurr.getInt(0)] );
         }
         catch (Exception e){
-            Log.d("Read Log", "Parsing JSON " + logOut.getInt(0));
+            Log.d("Read Log", "Parsing JSON " + logCurr.getInt(0));
             Log.e("Read Log", "Parse JSON error " + e.toString());
         }
 
-        if (logOut.getInt(0) == 0) { // We dont need to parse extra information for this
+        if (logCurr.getInt(0) == 0) { // We dont need to parse extra information for this
             return " Ping";
         }
 
-        if (logOut.getInt(0) == 1 || logOut.getInt(0) == 2) {
+        if (logCurr.getInt(0) == 1 || logCurr.getInt(0) == 2) {
             try {
                 if (JSONFunctionParser.getBoolean("outbound")) {
                     return " outbound to " + JSONFunctionParser.getString("contact");
@@ -122,7 +136,7 @@ public class ReadingLog extends Activity {
             }
         }
 
-        Log.d("Read Log", logOut.getInt(0) + " does not have a relevant return - " + logOut.getString(1));
+        Log.d("Read Log", logCurr.getInt(0) + " does not have a relevant return - " + logCurr.getString(1));
         return " this item has been corrupted";
     }
 
@@ -133,14 +147,14 @@ public class ReadingLog extends Activity {
 
         JSONObject JSONParser;
 
-        logOut.move(item);
+        logCurr.move(item);
         String content = "";
 
         try {
 
-            JSONParser = new JSONObject(logOut.getString(1));
+            JSONParser = new JSONObject(logCurr.getString(1));
 
-            switch (logOut.getInt(0)) {
+            switch (logCurr.getInt(0)) {
                 case 0:
                     try {
                         content = "Lat - " + JSONParser.getString("lat-float") +
@@ -191,7 +205,7 @@ public class ReadingLog extends Activity {
                     break;
             }
 
-            content += "\n\n" + "Timestamp: " + logOut.getString(2);
+            content += "\n\n" + "Timestamp: " + logCurr.getString(2);
         }
         catch (Exception e) {
             Log.d("Read Log", "Reading JSON failed - " + e.toString());
@@ -199,9 +213,9 @@ public class ReadingLog extends Activity {
         }
 
         final AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppThemeDialog).create();
-        dialog.setTitle(dh.TYPES[logOut.getInt(0)]);
+        dialog.setTitle(dh.TYPES[logCurr.getInt(0)]);
         dialog.setMessage(content);
-        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Done",
+        dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Cool Beans!",
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -210,7 +224,7 @@ public class ReadingLog extends Activity {
                 });
         dialog.show();
 
-        logOut.moveToFirst();
+        logCurr.moveToFirst();
         Log.d("Read Log", "Long Click done");
 
     }

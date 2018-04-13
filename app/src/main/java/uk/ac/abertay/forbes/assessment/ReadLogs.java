@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,6 +28,10 @@ public class ReadLogs extends Activity {
 
     asyncDatabaseHelper dh = new asyncDatabaseHelper(this);
     SQLiteDatabase db;
+
+    ArrayAdapter<String> arrayAdapter;
+    ListView lv;
+
     Cursor logs;
 
     @Override
@@ -34,28 +40,30 @@ public class ReadLogs extends Activity {
         setContentView(R.layout.activity_read_options);
 
         delLogs = findViewById(R.id.btn_delete_toggle);
-
-        final Intent intent = getIntent();
-
-        final ListView lv = findViewById(R.id.list_logs);
+        lv = findViewById(R.id.list_logs);
 
         db = this.openOrCreateDatabase(dh.getDatabaseName(), MODE_PRIVATE, null);
+        dh.readLogs(db, this);
 
+        Log.d("Read Options", "Successful Launch");
+    }
+
+    public void startList(Cursor cursor) {
         try {
-            logs = dh.readLogs(db);
+            logs = cursor;
 
             Log.d("Read Options", "Read Successful. Count " + logs.getCount());
 
             logs.moveToFirst();
 
             Log.d("Read Options", "Not Dummy Mode");
-            populate(lv, logs);
+            populate();
         }
         catch (Exception e) {
             dh.onCreate(db);
             Log.d("Read Options", "Dummy Mode");
             Log.d("Read Options", e.toString());
-            dummyPopulate(lv, -1);
+            dummyPopulate(-1);
             dummyMode = Boolean.TRUE;
         }
 
@@ -67,18 +75,17 @@ public class ReadLogs extends Activity {
 
                     // Update list
                     if (dummyMode == Boolean.TRUE) {
-                        dummyPopulate(lv, position);
+                        dummyPopulate(position);
                     } else {
                         // Delete item in DB
                         logs.move(position);
                         dh.deleteLog(db, logs.getInt(0));
-
-                        logs = dh.readLogs(db);
-                        populate(lv, logs);
+                        arrayAdapter.remove(str);
+                        dh.resetLogs(db);
                     }
 
-                    Toast.makeText(getApplicationContext(), str + " Deleted", Toast.LENGTH_LONG)
-                            .show();
+                    Toast.makeText(getApplicationContext(), str + " Deleted", Toast.LENGTH_SHORT)
+                         .show();
 
                     delLogToggle(view);
                 }
@@ -93,10 +100,9 @@ public class ReadLogs extends Activity {
                 }
             }
         });
-        Log.d("Read Options", "Successful Launch");
     }
 
-    public void dummyPopulate(ListView lv, int repopulate) {
+    public void dummyPopulate(int repopulate) {
         Log.d("Read Options", "Dummy Populate Called");
         List<String> dummyValues = new ArrayList<String>();
 
@@ -109,36 +115,37 @@ public class ReadLogs extends Activity {
             dummyValues.remove(repopulate);
         }
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>
-                (this, android.R.layout.simple_list_item_1, dummyValues);
+        arrayAdapter = new ArrayAdapter<String> (this,
+                android.R.layout.simple_list_item_1,
+                dummyValues);
 
         lv.setAdapter(arrayAdapter);
     }
 
-    public void populate(ListView lv, Cursor databaseResponse) {
+    public void populate() {
         // this is also used as repopulate as all of the calls need to be remade to change our
         // dataset anyway so what's the point in keeping old data in memory
         Log.d("Read Options", "Populate Called");
 
         List<String> values = new ArrayList<String>();
 
-        databaseResponse.moveToFirst();
+        logs.moveToFirst();
 
-        for (int x = databaseResponse.getCount(); x > 0; x--) {
-            if (databaseResponse.getString(1) != null) {
-                values.add("Log " + databaseResponse.getInt(0) + " (" + databaseResponse.getString(1) + ")");
+        for (int x = logs.getCount(); x > 0; x--) {
+            if (logs.getString(1) != null) {
+                values.add("Log " + logs.getInt(0) + " (" + logs.getString(1) + ")");
             }
             else {
-                values.add("Log " + databaseResponse.getInt(0));
+                values.add("Log " + logs.getInt(0));
             }
 
             Log.d("Read Options", x-1 + " items remain");
-            databaseResponse.moveToNext();
+            logs.moveToNext();
         }
 
-        databaseResponse.moveToFirst();
+        logs.moveToFirst();
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>
+        arrayAdapter = new ArrayAdapter<String>
                 (this, android.R.layout.simple_list_item_1, values);
 
        lv.setAdapter(arrayAdapter);
