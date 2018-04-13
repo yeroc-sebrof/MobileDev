@@ -1,9 +1,6 @@
 package uk.ac.abertay.forbes.assessment;
 
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQuery;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,7 +33,7 @@ public class OpenScreen extends AppCompatActivity {
     }
 
     public void read(View view) {
-        Intent intent = new Intent(this, ReadOptions.class);
+        Intent intent = new Intent(this, ReadLogs.class);
         Log.d("Main Menu", "Review Log Pushed");
         startActivity(intent);
     }
