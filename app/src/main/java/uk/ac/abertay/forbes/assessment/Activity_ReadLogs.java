@@ -24,7 +24,7 @@ public class Activity_ReadLogs extends Activity {
 
     Button delLogs;
 
-    AsyncDatabaseHelper dh = new AsyncDatabaseHelper(this);
+    AsyncDatabaseHelper dh;
     SQLiteDatabase db;
 
     ArrayAdapter<String> arrayAdapter;
@@ -40,7 +40,12 @@ public class Activity_ReadLogs extends Activity {
         delLogs = findViewById(R.id.btn_delete_toggle);
         lv = findViewById(R.id.list_logs);
 
-        db = this.openOrCreateDatabase(dh.getDatabaseName(), MODE_PRIVATE, null);
+        db = this.openOrCreateDatabase(dh.DATABASE_NAME, MODE_PRIVATE, null);
+
+        dh = new AsyncDatabaseHelper(this); // ON CREATE SHOULD CALL HERE
+
+        dh.onCreate(db); // TODO SO WHY DOES NOT DOING THIS MAKE MY APP NOT WORK ?
+
         dh.readLogs(db, this);
 
         Log.d("Read Options", "Successful Launch");

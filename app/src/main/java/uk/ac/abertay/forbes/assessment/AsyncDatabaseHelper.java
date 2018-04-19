@@ -14,7 +14,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     // Handler Database Name
-    private static final String DATABASE_NAME = "logs_db";
+    public static final String DATABASE_NAME = "logs_db";
 
     // Handler Table
     // Handler Table Name
@@ -42,9 +42,17 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
 
     // Create Tables
     @Override
-        public void onCreate(SQLiteDatabase db) {
-        asyncOnCreate asyncTask = new asyncOnCreate(db);
-        asyncTask.execute();
+    public void onCreate(SQLiteDatabase db) {
+        String CREATE_HANDLER_TABLE =
+                "CREATE TABLE IF NOT EXISTS " + HANDLER_TABLE_NAME
+                        + "( "
+                        + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + LOG + " TINYTEXT, "
+                        + COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
+                        + " );";
+
+        db.execSQL(CREATE_HANDLER_TABLE);
+        Log.d("Database Helper", "Should have made Logs");
     }
 
     @Override
@@ -71,7 +79,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         asyncTask.execute();
     }
 
-    void lastItemInLogIndex(SQLiteDatabase db) {
+    void debugAddActions(SQLiteDatabase db) {
         readIndexLastLog asyncTask = new readIndexLastLog(db);
         asyncTask.execute();
     }
@@ -93,9 +101,6 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         asyncDelLog asyncTask = new asyncDelLog(db);
         asyncTask.execute(id);
     }
-
-    public String getDatabaseName()
-    { return DATABASE_NAME; }
 
     public String [] getTYPES()
     { return TYPES; }
@@ -194,7 +199,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         protected Cursor doInBackground(Void... voids) {
 
             return db.query(HANDLER_TABLE_NAME,
-                    new String[]{COLUMN_ID, LOG, COLUMN_TIMESTAMP},
+                    new String[]{ COLUMN_ID, LOG, COLUMN_TIMESTAMP },
                     null, null, null, null,
                     COLUMN_ID + " ASC",
                     null);
@@ -226,30 +231,6 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         protected void onPostExecute(Cursor cursor) {
             readLogsActivity.logs = cursor;
             readLogsActivity.logs.moveToFirst();
-        }
-    }
-
-
-    class asyncOnCreate extends AsyncTask<Void, Void, Void> {
-        private SQLiteDatabase db;
-        asyncOnCreate(SQLiteDatabase database)
-        {
-            Log.d("Database Helper", "On create task created");
-            db = database;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            String CREATE_HANDLER_TABLE =
-                    "CREATE TABLE IF NOT EXISTS " + HANDLER_TABLE_NAME
-                            + "("
-                            + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                            + LOG + " TINYTEXT,"
-                            + COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
-                            + ");";
-
-            db.execSQL(CREATE_HANDLER_TABLE);
-            return null;
         }
     }
 

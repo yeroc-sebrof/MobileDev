@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.ToggleButton;
 
 import java.util.Calendar;
 
@@ -20,15 +19,16 @@ public class Activity_Record extends Activity {
     EditText edit_text_log_name,
             edit_text_gps_time;
 
-    String time = "04:00",
-           log_name = null;
-    Integer gps_time;
-    Boolean debug,
-            gps = true, // TODO FIX THIS CRASHING THE MORE OPTION MENUE
-            texts = true,
-            calls = true;
-
-    ToggleButton gps_btn, text_btn, call_btn;// TODO ABOVE TO DO WITH THIS TOO
+    String time = "04:00";
+//           log_name = null;
+//    Integer gps_time, gps_powersaving = 6;
+    Boolean debug;
+//            power_saving = false,
+//            gps = true, // TODO FIX THIS CRASHING THE MORE OPTION MENU
+//            texts = true,
+//            calls = true;
+//
+//    ToggleButton gps_btn, text_btn, call_btn;// TODO ABOVE TO DO WITH THIS TOO
 
 
     @Override
@@ -120,50 +120,62 @@ public class Activity_Record extends Activity {
         else
         {
             // Make a dialog with more_options_dialog.xml
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppThemeDialog);
-
-            builder.setTitle(R.string.more_options)
-                    .setView(R.layout.more_options_dialog)
-                    .setNegativeButton("Dinnie", new DialogInterface.OnClickListener() { // Might not need a negative button
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // Nothing needs done here tbh
-                        }
-                    })
-                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // Save the state of all of the options
-                        }
-                    });
-
-            AlertDialog dialog = builder.create();
-
-            gps_btn = findViewById(R.id.btn_GPS); // TODO ABOVE PROBLEM LIES HERE IN EXECUTION
-            gps_btn.setChecked(gps); // TODO I THINK ITS DUE TO THE DIALOG NOT LOADING IN YET?
-
-            text_btn = findViewById(R.id.btn_Texts);
-            text_btn.setChecked(texts);
-
-            call_btn = findViewById(R.id.btn_Calls);
-            call_btn.setChecked(calls);
-
-            edit_text_gps_time = findViewById(R.id.editLocationPingTime);
-            edit_text_gps_time.setText(gps_time);
-
-            edit_text_log_name = findViewById(R.id.editLogname);
-            edit_text_log_name.setText(log_name);
-
-            dialog.show();
+//            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppThemeDialog);
+//
+//            builder.setTitle(R.string.more_options)
+//                    .setView(R.layout.more_options_dialog)
+//                    .setNegativeButton("Dinnie", new DialogInterface.OnClickListener() { // Might not need a negative button
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int i) {
+//                            // Nothing needs done here tbh
+//                        }
+//                    })
+//                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int i) {
+//                            gps = gps_btn.isChecked();
+//                            texts = text_btn.isChecked();
+//                            calls = call_btn.isChecked();
+//
+//                            gps_time.parseInt(edit_text_gps_time.getText().toString());
+//                        }
+//                    });
+//
+//            AlertDialog dialog = builder.create();
+//
+//            gps_btn = findViewById(R.id.btn_GPS); // TODO ABOVE PROBLEM LIES HERE IN EXECUTION
+//            gps_btn.setChecked(gps); // TODO I THINK ITS DUE TO THE DIALOG NOT LOADING IN YET?
+//
+//            text_btn = findViewById(R.id.btn_Texts);
+//            text_btn.setChecked(texts);
+//
+//            call_btn = findViewById(R.id.btn_Calls);
+//            call_btn.setChecked(calls);
+//
+//            edit_text_gps_time = findViewById(R.id.editLocationPingTime);
+//            edit_text_gps_time.setText(gps_time);
+//
+//            edit_text_log_name = findViewById(R.id.editLogname);
+//            edit_text_log_name.setText(log_name);
+//
+//            dialog.show();
         }
     }
 
     public void powerSavings(View view) {
+        int temp;
+
         if (debug) {
             debugMakeItemInLog(view);
         }
-        else{
-            // Change the time between GPS pings to 5 or 6 min
+        else {
+            // Change between the users time and the power saving time
+//            temp = gps_powersaving;
+//            gps_powersaving = gps_time;
+//            gps_time = temp;
+//            power_saving = !power_saving;
+//            Toast.makeText(getApplicationContext(),"Power Saving " + power_saving.toString(), Toast.LENGTH_SHORT)
+//                    .show();
         }
     }
 
@@ -171,20 +183,20 @@ public class Activity_Record extends Activity {
         Log.d("Activity_Record Options", "Debug Make log action Called");
 
         AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
-        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
+        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.DATABASE_NAME,
                 MODE_PRIVATE, null);
         Log.d("Activity_Record Options", "Database connection established");
 
-        debugHelp.lastItemInLogIndex(debugDatabase);
+        debugHelp.debugAddActions(debugDatabase);
 
-        Log.d("Activity_Record Options", "Debug logs made");
+        Log.d("Activity_Record Options", "Debug log items added");
     }
 
     public void debugMakeLogs(View view) {
         Log.d("Activity_Record Options", "Debug Make logs Called");
 
         AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
-        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
+        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.DATABASE_NAME,
                                                                         MODE_PRIVATE, null);
         Log.d("Activity_Record Options", "Database connection established");
 

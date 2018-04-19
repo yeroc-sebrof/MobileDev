@@ -25,7 +25,7 @@ public class Activity_ReadingLog extends Activity {
 
     TextView readingLog;
 
-    AsyncDatabaseHelper dh = new AsyncDatabaseHelper(this);
+    AsyncDatabaseHelper dh;
     SQLiteDatabase db;
 
     ArrayAdapter<String> arrayAdapter;
@@ -53,7 +53,8 @@ public class Activity_ReadingLog extends Activity {
         }
 
         try {
-            db = this.openOrCreateDatabase(dh.getDatabaseName(), MODE_PRIVATE, null);
+            db = this.openOrCreateDatabase(dh.DATABASE_NAME, MODE_PRIVATE, null);
+            dh = new AsyncDatabaseHelper(this);
         }
         catch (Exception e) {
             Log.e("Read Log", "How did you get this far and couldn't open a database - " + e.toString());
