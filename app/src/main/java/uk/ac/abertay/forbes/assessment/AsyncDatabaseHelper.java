@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.util.Log;
 
-public class asyncDatabaseHelper extends SQLiteOpenHelper {
+public class AsyncDatabaseHelper extends SQLiteOpenHelper {
 
     // Database Version
     private static final int DATABASE_VERSION = 1;
@@ -31,14 +31,14 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
     // So the storage in the db just has to be a int it will be pulled and the type will be TYPES[<db int>]
     final String[] TYPES = {"GPS", "Phone Call", "SMS"};
 
-    asyncDatabaseHelper(Context context) {
+    AsyncDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     //Handler handler;// = new Handler();
 
-    private ReadLogs readLogsActivity = null;
-    private ReadingLog readingLogActivity = null;
+    private Activity_ReadLogs readLogsActivity = null;
+    private Activity_ReadingLog readingLogActivity = null;
 
     // Create Tables
     @Override
@@ -53,13 +53,13 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
         asyncTask.execute();
     }
 
-    void readLog(SQLiteDatabase db, int id, ReadingLog parent) {
+    void readLog(SQLiteDatabase db, int id, Activity_ReadingLog parent) {
         asyncReadLog asyncTask = new asyncReadLog(db);
         readingLogActivity = parent;
         asyncTask.execute(id);
     }
 
-    void readLogs(SQLiteDatabase db, ReadLogs parent) {
+    void readLogs(SQLiteDatabase db, Activity_ReadLogs parent) {
         // This is now Significantly slower than without async. Will continue to async all tasks tho
         asyncReadLogs asyncTask = new asyncReadLogs(db);
         readLogsActivity = parent;
@@ -105,18 +105,18 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
 
         asyncOnUpgrade(SQLiteDatabase database)
         {
-            Log.d("Database Helper", "ReadLogs task created");
+            Log.d("Database Helper", "Activity_ReadLogs task created");
             db = database;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             // Make sure there's not a old table to interupt this process
-            db.execSQL("DROP TABLE IF EXISTS " + asyncDatabaseHelper.HANDLER_TABLE_NAME + "_OLD;");
+            db.execSQL("DROP TABLE IF EXISTS " + HANDLER_TABLE_NAME + "_OLD;");
 
             // Rename table
-            db.execSQL("ALTER TABLE " + asyncDatabaseHelper.HANDLER_TABLE_NAME +
-                    " RENAME TO " + asyncDatabaseHelper.HANDLER_TABLE_NAME + "_OLD;");
+            db.execSQL("ALTER TABLE " + HANDLER_TABLE_NAME +
+                    " RENAME TO " + HANDLER_TABLE_NAME + "_OLD;");
 
 
             onCreate(db);
@@ -133,7 +133,7 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
 
         readIndexLastLog(SQLiteDatabase database)
         {
-            Log.d("Database Helper", "ReadLogs task created");
+            Log.d("Database Helper", "Activity_ReadLogs task created");
             db = database;
         }
 
@@ -186,7 +186,7 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
         private SQLiteDatabase db;
 
         asyncReadLogs(SQLiteDatabase database) {
-            Log.d("Database Helper", "ReadLogs task created");
+            Log.d("Database Helper", "Activity_ReadLogs task created");
             db = database;
         }
 
@@ -210,7 +210,7 @@ public class asyncDatabaseHelper extends SQLiteOpenHelper {
         private SQLiteDatabase db;
         asyncResetLogs(SQLiteDatabase database)
         {
-            Log.d("Database Helper", "ReadLogs task created");
+            Log.d("Database Helper", "Activity_ReadLogs task created");
             db = database;
         }
 

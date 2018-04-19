@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ReadingLog extends Activity {
+public class Activity_ReadingLog extends Activity {
     int log;
 
     TextView readingLog;
 
-    asyncDatabaseHelper dh = new asyncDatabaseHelper(this);
+    AsyncDatabaseHelper dh = new AsyncDatabaseHelper(this);
     SQLiteDatabase db;
 
     ArrayAdapter<String> arrayAdapter;

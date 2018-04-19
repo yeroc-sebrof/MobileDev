@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,13 +18,13 @@ import java.util.List;
 
 // TODO Make the list use subtitles instead https://youtu.be/VYDLTBjdliY
 
-public class ReadLogs extends Activity {
+public class Activity_ReadLogs extends Activity {
     boolean deleting = Boolean.FALSE,
             dummyMode;
 
     Button delLogs;
 
-    asyncDatabaseHelper dh = new asyncDatabaseHelper(this);
+    AsyncDatabaseHelper dh = new AsyncDatabaseHelper(this);
     SQLiteDatabase db;
 
     ArrayAdapter<String> arrayAdapter;
@@ -166,7 +164,7 @@ public class ReadLogs extends Activity {
     }
 
     public void openLog(View view, int id) {
-        Intent intent = new Intent(this, ReadingLog.class);
+        Intent intent = new Intent(this, Activity_ReadingLog.class);
         intent.putExtra("log", id);
         startActivity(intent);
     }
