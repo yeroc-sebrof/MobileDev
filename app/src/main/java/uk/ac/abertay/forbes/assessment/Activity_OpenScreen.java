@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-public class OpenScreen extends AppCompatActivity {
+public class Activity_OpenScreen extends AppCompatActivity {
     int debug = 0;
     boolean debugActive = Boolean.FALSE;
 
@@ -26,14 +26,14 @@ public class OpenScreen extends AppCompatActivity {
     }
 
     public void make(View view) {
-        Intent intent = new Intent(this, Record.class);
+        Intent intent = new Intent(this, Activity_Record.class);
         intent.putExtra("debug", debugActive);
         Log.d("Main Menu", "New Log Pushed");
         startActivity(intent);
     }
 
     public void read(View view) {
-        Intent intent = new Intent(this, ReadLogs.class);
+        Intent intent = new Intent(this, Activity_ReadLogs.class);
         Log.d("Main Menu", "Review Log Pushed");
         startActivity(intent);
     }
