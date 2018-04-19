@@ -2,23 +2,34 @@ package uk.ac.abertay.forbes.assessment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.database.Cursor;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.ScaleAnimation;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.ToggleButton;
 
 import java.util.Calendar;
 
-public class Record extends Activity {
+public class Activity_Record extends Activity {
     TextView time_end;
-    String time = "04:00";
-    Boolean debug;
+    EditText edit_text_log_name,
+            edit_text_gps_time;
+
+    String time = "04:00",
+           log_name = null;
+    Integer gps_time;
+    Boolean debug,
+            gps = true, // TODO FIX THIS CRASHING THE MORE OPTION MENUE
+            texts = true,
+            calls = true;
+
+    ToggleButton gps_btn, text_btn, call_btn;// TODO ABOVE TO DO WITH THIS TOO
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +42,7 @@ public class Record extends Activity {
         // Error here is null as debug will always be passed
         debug = getIntent().getExtras().getBoolean("debug");
 
-        Log.d("Record Options", "Successful Launch");
+        Log.d("Activity_Record Options", "Successful Launch");
     }
 
     public void endAt(View view) {
@@ -39,7 +50,7 @@ public class Record extends Activity {
 
         final int hour = currentTimes.get(Calendar.HOUR_OF_DAY);
         final int minute = currentTimes.get(Calendar.MINUTE);
-        Log.d("Record Options", "Current Time - " + hour + ":" + minute);
+        Log.d("Activity_Record Options", "Current Time - " + hour + ":" + minute);
 
         TimePickerDialog timePicker =
                 new TimePickerDialog(this, R.style.AppThemeDialog, new TimePickerDialog.OnTimeSetListener() {
@@ -60,12 +71,12 @@ public class Record extends Activity {
                         }
 
                         time_end.setText(time);
-                        Log.d("Record Options", "Time Picker Done : " + time);
+                        Log.d("Activity_Record Options", "Time Picker Done : " + time);
                     }
                 }, hour, minute, true);
 
         timePicker.show();
-        Log.d("Record Options", "Time Picker Dialog displayed");
+        Log.d("Activity_Record Options", "Time Picker Dialog displayed");
     }
 
     public void startRecording(View view) {
@@ -112,9 +123,36 @@ public class Record extends Activity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppThemeDialog);
 
             builder.setTitle(R.string.more_options)
-                    .setView(R.layout.more_options_dialog);
+                    .setView(R.layout.more_options_dialog)
+                    .setNegativeButton("Dinnie", new DialogInterface.OnClickListener() { // Might not need a negative button
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Nothing needs done here tbh
+                        }
+                    })
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Save the state of all of the options
+                        }
+                    });
 
             AlertDialog dialog = builder.create();
+
+            gps_btn = findViewById(R.id.btn_GPS); // TODO ABOVE PROBLEM LIES HERE IN EXECUTION
+            gps_btn.setChecked(gps); // TODO I THINK ITS DUE TO THE DIALOG NOT LOADING IN YET?
+
+            text_btn = findViewById(R.id.btn_Texts);
+            text_btn.setChecked(texts);
+
+            call_btn = findViewById(R.id.btn_Calls);
+            call_btn.setChecked(calls);
+
+            edit_text_gps_time = findViewById(R.id.editLocationPingTime);
+            edit_text_gps_time.setText(gps_time);
+
+            edit_text_log_name = findViewById(R.id.editLogname);
+            edit_text_log_name.setText(log_name);
 
             dialog.show();
         }
@@ -130,27 +168,27 @@ public class Record extends Activity {
     }
 
     public void debugMakeItemInLog(View view) {
-        Log.d("Record Options", "Debug Make log action Called");
+        Log.d("Activity_Record Options", "Debug Make log action Called");
 
-        asyncDatabaseHelper debugHelp = new asyncDatabaseHelper(this);
+        AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
         SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
                 MODE_PRIVATE, null);
-        Log.d("Record Options", "Database connection established");
+        Log.d("Activity_Record Options", "Database connection established");
 
         debugHelp.lastItemInLogIndex(debugDatabase);
 
-        Log.d("Record Options", "Debug logs made");
+        Log.d("Activity_Record Options", "Debug logs made");
     }
 
     public void debugMakeLogs(View view) {
-        Log.d("Record Options", "Debug Make logs Called");
+        Log.d("Activity_Record Options", "Debug Make logs Called");
 
-        asyncDatabaseHelper debugHelp = new asyncDatabaseHelper(this);
+        AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
         SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.getDatabaseName(),
                                                                         MODE_PRIVATE, null);
-        Log.d("Record Options", "Database connection established");
+        Log.d("Activity_Record Options", "Database connection established");
 
         debugHelp.makeNewLog(debugDatabase, "fake news");
-        Log.d("Record Options", "Debug logs made");
+        Log.d("Activity_Record Options", "Debug logs made");
     }
 }
