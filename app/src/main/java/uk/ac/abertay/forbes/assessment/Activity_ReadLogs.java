@@ -23,6 +23,8 @@ import java.util.List;
 // TODO Make the list use subtitles instead https://youtu.be/VYDLTBjdliY
 
 public class Activity_ReadLogs extends Activity {
+    private static final String TAG = "Read Options";
+
     boolean deleting = Boolean.FALSE,
             dummyMode;
 
@@ -56,7 +58,7 @@ public class Activity_ReadLogs extends Activity {
                     dh = new AsyncDatabaseHelper(this);
                     // BUT IT STILL HAS TO BE CALLED HERE
                     dh.onCreate(db);
-                    dh.readLogs(db, this);
+                    dh.readLogs(db,this);
                 }
             }
         }
@@ -72,7 +74,7 @@ public class Activity_ReadLogs extends Activity {
 
         Boolean READ = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == 0;
 
-        Log.d("Read Options", "Read permissions " + READ.toString());
+        Log.d(TAG, "Read permissions " + READ.toString());
         if (READ) {
             db = getApplication().openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME, MODE_PRIVATE, null);
             dh = new AsyncDatabaseHelper(this); // ON CREATE SHOULD CALL HERE
@@ -84,24 +86,24 @@ public class Activity_ReadLogs extends Activity {
             requestPermissions(new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, R.string.app_name);
         }
 
-        Log.d("Read Options", "Successful Launch");
+        Log.d(TAG, "Successful Launch");
     }
 
     public void startList(Cursor cursor) {
         try {
             logs = cursor;
 
-            Log.d("Read Options", "Read Successful. Count " + logs.getCount());
+            Log.d(TAG, "Read Successful. Count " + logs.getCount());
 
             logs.moveToFirst();
 
-            Log.d("Read Options", "Not Dummy Mode");
+            Log.d(TAG, "Not Dummy Mode");
             populate();
         }
         catch (Exception e) {
             dh.onCreate(db);
-            Log.d("Read Options", "Dummy Mode");
-            Log.d("Read Options", e.toString());
+            Log.d(TAG, "Dummy Mode");
+            Log.d(TAG, e.toString());
             dummyPopulate(-1);
             dummyMode = Boolean.TRUE;
         }
@@ -110,7 +112,7 @@ public class Activity_ReadLogs extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String str = (String)(Object) lv.getItemAtPosition(position);
                 if (deleting) {
-                    Log.d("Read Options", "Log " + str + " Selected for Deletion");
+                    Log.d(TAG, "Log " + str + " Selected for Deletion");
 
                     // Update list
                     if (dummyMode == Boolean.TRUE) {
@@ -129,7 +131,7 @@ public class Activity_ReadLogs extends Activity {
                     delLogToggle(view);
                 }
                 else {
-                    Log.d("Read Options", position + " Selected");
+                    Log.d(TAG, position + " Selected");
 
                     if (dummyMode != Boolean.TRUE) {
                         logs.move(position);
@@ -142,7 +144,7 @@ public class Activity_ReadLogs extends Activity {
     }
 
     public void dummyPopulate(int repopulate) {
-        Log.d("Read Options", "Dummy Populate Called");
+        Log.d(TAG, "Dummy Populate Called");
         List<String> dummyValues = new ArrayList<>();
 
         dummyValues.add("No Responses");
@@ -164,7 +166,7 @@ public class Activity_ReadLogs extends Activity {
     public void populate() {
         // this is also used as repopulate as all of the calls need to be remade to change our
         // dataset anyway so what's the point in keeping old data in memory
-        Log.d("Read Options", "Populate Called");
+        Log.d(TAG, "Populate Called");
 
         List<String> values = new ArrayList<>();
 
@@ -178,7 +180,7 @@ public class Activity_ReadLogs extends Activity {
                 values.add("Log " + logs.getInt(0));
             }
 
-            Log.d("Read Options", x-1 + " items remain");
+            Log.d(TAG, x-1 + " items remain");
             logs.moveToNext();
         }
 
@@ -201,7 +203,7 @@ public class Activity_ReadLogs extends Activity {
             }
 
 
-        Log.d("Read Options", "Deleting mode: " + deleting);
+        Log.d(TAG, "Deleting mode: " + deleting);
     }
 
     public void openLog(View view, int id) {
