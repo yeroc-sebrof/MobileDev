@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class Activity_OpenScreen extends AppCompatActivity {
+    private static final String TAG = "Menu";
+
     int debug = 0;
     boolean debugActive = false,
             currentlyRecording = false;
@@ -27,7 +29,7 @@ public class Activity_OpenScreen extends AppCompatActivity {
 
         setContentView(R.layout.activity_main_menu);
         btn_newLog = findViewById(R.id.btn_new_log);
-        Log.d("Main Menu", "Successful Launch");
+        Log.d(TAG, "Successful Launch");
     }
 
     @Override
@@ -44,13 +46,13 @@ public class Activity_OpenScreen extends AppCompatActivity {
     public void make(View view) {
         Intent intent = new Intent(this, Activity_Record.class);
         intent.putExtra("debug", debugActive);
-        Log.d("Main Menu", "New Log Pushed");
+        Log.d(TAG, "New Log Pushed");
         startActivity(intent);
     }
 
     public void read(View view) {
         Intent intent = new Intent(this, Activity_ReadLogs.class);
-        Log.d("Main Menu", "Review Log Pushed");
+        Log.d(TAG, "Review Log Pushed");
         startActivityForResult(intent, 0);
     }
 
