@@ -1,5 +1,6 @@
 package uk.ac.abertay.forbes.assessment;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,6 +10,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 public class AsyncDatabaseHelper extends SQLiteOpenHelper {
+
+    private static final String TAG = "Database Helper";
 
     // Database Version
     private static final int DATABASE_VERSION = 1;
@@ -52,7 +55,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
                         + " );";
 
         db.execSQL(CREATE_HANDLER_TABLE);
-        Log.d("Database Helper", "Should have made Logs");
+        Log.d(TAG, "Should have made Logs");
     }
 
     @Override
@@ -110,7 +113,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
 
         asyncOnUpgrade(SQLiteDatabase database)
         {
-            Log.d("Database Helper", "Activity_ReadLogs task created");
+            Log.d(TAG, "Activity_ReadLogs task created");
             db = database;
         }
 
@@ -133,6 +136,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class debugActivities extends AsyncTask<Void, Void, Void> {
         private SQLiteDatabase db;
 
@@ -167,11 +171,12 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class asyncReadLog extends AsyncTask<Integer, Void, Cursor> {
         private SQLiteDatabase db;
         asyncReadLog(SQLiteDatabase database)
         {
-            Log.d("Database Helper", "ReadLog task created");
+            Log.d(TAG, "ReadLog task created");
             db = database;
         }
 
@@ -190,11 +195,12 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class asyncReadLogs extends AsyncTask<Void, Void, Cursor> {
         private SQLiteDatabase db;
 
         asyncReadLogs(SQLiteDatabase database) {
-            Log.d("Database Helper", "Activity_ReadLogs task created");
+            Log.d(TAG, "Activity_ReadLogs task created");
             db = database;
         }
 
@@ -214,11 +220,12 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class asyncResetLogs extends AsyncTask<Void, Void, Cursor> {
         private SQLiteDatabase db;
         asyncResetLogs(SQLiteDatabase database)
         {
-            Log.d("Database Helper", "Activity_ReadLogs task created");
+            Log.d(TAG, "Activity_ReadLogs task created");
             db = database;
         }
 
@@ -237,11 +244,12 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class asyncDelLog extends AsyncTask<Integer, Void, Void> {
         private SQLiteDatabase db;
         asyncDelLog(SQLiteDatabase database)
         {
-            Log.d("Database Helper", "Delete Log created");
+            Log.d(TAG, "Delete Log created");
             db = database;
         }
 
@@ -249,17 +257,18 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         protected Void doInBackground(Integer... ints) {
             String del = "DROP TABLE IF EXISTS " + LOG + ints[0] + ";";
             db.execSQL(del);
-            Log.d("Database Helper","Dropped Table Log " + ints[0]);
+            Log.d(TAG,"Dropped Table Log " + ints[0]);
 
             db.delete(HANDLER_TABLE_NAME,
                     COLUMN_ID + "=" + ints[0],
                     null);
-            Log.d("Database Helper","Removed Index ID " + ints[0]);
+            Log.d(TAG,"Removed Index ID " + ints[0]);
 
             return null;
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     class asyncNewLog extends AsyncTask<Void, Void, Integer> {
         private SQLiteDatabase db;
         private ContentValues insertValue = new ContentValues(0);
@@ -267,7 +276,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
 
         asyncNewLog(SQLiteDatabase database, String name, Service_Record calledBy)
         {
-            Log.d("Database Helper", "Make new log created");
+            Log.d(TAG, "Make new log created");
             db = database;
 
             SR_ptr = calledBy;
@@ -275,17 +284,17 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
             // For the sake of readability would prefer none to be null
             if (name.equals("")) { name = null; }
             insertValue.put(LOG, name);
-            Log.d("Database Helper", "Value Inserted to Index");
+            Log.d(TAG, "Value Inserted to Index");
         }
 
         @Override
         protected Integer doInBackground(Void... voids) {
             Integer logIs;
-            Log.d("Database Helper", "Make new log called");
+            Log.d(TAG, "Make new log called");
             db.insert(HANDLER_TABLE_NAME,
                     null,
                     insertValue);
-            Log.d("Database Helper", "Value Inserted to Index");
+            Log.d(TAG, "Value Inserted to Index");
 
             // Query to get the new Log ID to work with
             final Cursor logNo = db.query(HANDLER_TABLE_NAME,
@@ -304,19 +313,19 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
                     + COLUMN_CONTENT + " TEXT NOT NULL, "
                     + COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP"
                     + ");";
-            Log.d("Database Helper", "Executing: " + CREATE_LOG);
+            Log.d(TAG, "Executing: " + CREATE_LOG);
 
             db.execSQL(CREATE_LOG);
 
-            Log.d("Database Helper", "Done making new log" + logIs);
+            Log.d(TAG, "Done making new log" + logIs);
             return logIs;
         }
 
         @Override
         protected void onPostExecute(Integer log) {
             if (SR_ptr != null){
-                Log.d("Database Helper", "New log Post Exe");
-                SR_ptr.logid = log;
+                Log.d(TAG, "New log Post Exe");
+                SR_ptr.log_id = log;
                 SR_ptr.setupListeners();
             }
         }
