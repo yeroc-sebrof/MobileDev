@@ -11,33 +11,37 @@ import java.util.Objects;
 
 public class CallReceiver extends PhonecallReceiver {
 
-    private Service_Record parent = null;
-
-    public void setReq(Service_Record sr) {
-        parent = sr;
-    }
+    private Listener listener;
 
     @Override
     protected void onIncomingCallEnded(Context context, String number, Date start, Date end) {
-        parent.gotACall(number,false, start);
+        if (listener != null) listener.onCallReceived(number,false, start);
     }
 
     @Override
     protected void onOutgoingCallEnded(Context context, String number, Date start, Date end) {
-        parent.gotACall(number,true, start);
+        if (listener != null) listener.onCallReceived(number,true, start);
     }
 
     @Override
     protected void onMissedCall(Context context, String number, Date end) {
-        parent.gotACall(number,false,null);
+        if (listener != null) listener.onCallReceived(number,false, new Date());
     }
 
+    void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
+    interface Listener {
+        void onCallReceived(String number, Boolean outbound, Date start);
+    }
 }
 
 abstract class PhonecallReceiver  extends BroadcastReceiver {
     // Copied from
     // https://gist.github.com/ftvs/e61ccb039f511eb288ee
     // This one's use of abstract should be done for SMS TODO given the time
+    private static final String TAG = "Call Receiver";
 
     private static int lastState = TelephonyManager.CALL_STATE_IDLE;
     private static Date callStartTime;
@@ -47,7 +51,7 @@ abstract class PhonecallReceiver  extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("Call Record", "On Receive Triggered");
+        Log.d(TAG, "On Receive Triggered");
 
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
         if (Objects.equals(intent.getAction(), "android.intent.action.NEW_OUTGOING_CALL")) {
