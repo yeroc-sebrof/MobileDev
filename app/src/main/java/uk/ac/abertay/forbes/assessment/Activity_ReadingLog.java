@@ -25,6 +25,8 @@ import java.util.List;
 public class Activity_ReadingLog extends Activity {
     int log;
 
+    private static final String TAG = "Reading Log";
+
     TextView txt_currentActivity;
 
     AsyncDatabaseHelper dh;
@@ -82,12 +84,12 @@ public class Activity_ReadingLog extends Activity {
 
         try {
             log = getIntent().getExtras().getInt("log");
-            Log.d("Read Log", "Reading " + log);
+            Log.d(TAG, "Reading " + log);
 
             txt_currentActivity.append(" Log " + log);
         }
         catch (Exception e) {
-            Log.e("Read Log", "Intent failed to include an Int - " + e.toString());
+            Log.e(TAG, "Intent failed to include an Int - " + e.toString());
             this.finish();
         }
 
@@ -96,7 +98,7 @@ public class Activity_ReadingLog extends Activity {
             dh = new AsyncDatabaseHelper(this);
         }
         catch (Exception e) {
-            Log.e("Read Log", "How did you get this far and couldn't open a database - " + e.toString());
+            Log.e(TAG, "How did you get this far and couldn't open a database - " + e.toString());
             Toast.makeText(getApplicationContext(), "Unexpected error when opening a Database", Toast.LENGTH_LONG)
                     .show();
             this.finish();
@@ -108,7 +110,7 @@ public class Activity_ReadingLog extends Activity {
         // if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_CONTACTS) != 0) requestPermissions(new String[] {Manifest.permission.READ_CONTACTS}, R.string.app_name);
         // else contactsPerm = true;
 
-        Log.d("Read Log", "Successful Launch");
+        Log.d(TAG, "Successful Launch");
     }
 
     public void startList(Cursor cursor) {
@@ -116,13 +118,13 @@ public class Activity_ReadingLog extends Activity {
 
         logCurr.moveToNext();
 
-        Log.d("Read Log", "Log output has " + logCurr.getCount() + " items");
+        Log.d(TAG, "Log output has " + logCurr.getCount() + " items");
 
         List<String> logViewValues = new ArrayList<String>();
 
         for (int x = logCurr.getCount(); x > 0; x--) {
             logViewValues.add(dh.TYPES[logCurr.getInt(0)] + parseJson());
-            Log.d("Read Log", x-1 + " items remain");
+            Log.d(TAG, x-1 + " items remain");
             logCurr.moveToNext();
         }
 
@@ -141,7 +143,7 @@ public class Activity_ReadingLog extends Activity {
             }
         });
 
-        Log.d("Read Log", "Successful Database pull");
+        Log.d(TAG, "Successful Database pull");
     }
 
     String parseJson () {
@@ -151,16 +153,16 @@ public class Activity_ReadingLog extends Activity {
             JSONFunctionParser = new JSONObject(logCurr.getString(1));
         }
         catch (Exception e){
-            Log.d("Read Log", "Parser Broke - " + e.toString());
+            Log.d(TAG, "Parser Broke - " + e.toString());
             return " this item has been corrupted";
         }
 
         try {
-            Log.d("Read Log", "Parsing JSON " + dh.getTYPES()[logCurr.getInt(0)] );
+            Log.d(TAG, "Parsing JSON " + dh.getTYPES()[logCurr.getInt(0)] );
         }
         catch (Exception e){
-            Log.d("Read Log", "Parsing JSON " + logCurr.getInt(0));
-            Log.e("Read Log", "Parse JSON error " + e.toString());
+            Log.d(TAG, "Parsing JSON " + logCurr.getInt(0));
+            Log.e(TAG, "Parse JSON error " + e.toString());
         }
 
         if (logCurr.getInt(0) == 0) { // We dont need to parse extra information for this
@@ -175,19 +177,19 @@ public class Activity_ReadingLog extends Activity {
                     return " inbound from " + JSONFunctionParser.getString("contact");
                 }
             } catch (Exception e) {
-                Log.d("Read Log", "Parser Broke - " + e.toString());
+                Log.d(TAG, "Parser Broke - " + e.toString());
                 return " this item has been corrupted";
             }
         }
 
-        Log.d("Read Log", logCurr.getInt(0) + " does not have a relevant return - " + logCurr.getString(1));
+        Log.d(TAG, logCurr.getInt(0) + " does not have a relevant return - " + logCurr.getString(1));
         return " this item has been corrupted";
     }
 
 
     void takeItemFurther(View view, int item) {
         // This one should be used on long push of item in log
-        Log.d("Read Log", "Long Clicked item " + item);
+        Log.d(TAG, "Long Clicked item " + item);
 
         JSONObject JSONParser;
 
@@ -195,17 +197,17 @@ public class Activity_ReadingLog extends Activity {
         String content = "";
 
         try {
-
+            Log.i(TAG, "JSON DATA - " + logCurr.getString(1));
             JSONParser = new JSONObject(logCurr.getString(1));
 
             switch (logCurr.getInt(0)) {
                 case 0:
                     try {
-                        content = "Lat - " + JSONParser.getString("lat-float") +
-                                "\nLong - " + JSONParser.getString("long-float");
+                        content = "Lat - (" + JSONParser.getString("lat-float") + ")" +
+                                "\nLong - (" + JSONParser.getString("long-float") + ")";
                     }
                     catch (Exception e) {
-                        Log.d("Read Log", "Lat/Long didnt work");
+                        Log.d(TAG, "Lat/Long didnt work");
                         content = "There was an error.\nSorry!  Err - 1";
                     }
                     content += "\n\n" + "Timestamp: " + logCurr.getString(2);
@@ -236,7 +238,7 @@ public class Activity_ReadingLog extends Activity {
                     }
                     catch (Exception e) {
                         // This ones the most likely fuck up
-                        Log.d("Read Log", "Contact/Outbound/Start/End didn't work");
+                        Log.d(TAG, "Contact/Outbound/Start/End didn't work");
                         content = "There was an error.\nSorry!  Err - 2";
                         content += "\n\n" + "Timestamp: " + logCurr.getString(2);
                     }
@@ -259,7 +261,7 @@ public class Activity_ReadingLog extends Activity {
                         content+="\nContent:\n\n" + JSONParser.getString("content");
                     }
                     catch (Exception e) {
-                        Log.d("Read Log", "Contact/Outbound/Content didn't work");
+                        Log.d(TAG, "Contact/Outbound/Content didn't work");
                         content = "There was an error.\nSorry!  Err - 3";
                     }
                     content += "\n\n" + "Timestamp: " + logCurr.getString(2);
@@ -267,7 +269,7 @@ public class Activity_ReadingLog extends Activity {
             }
         }
         catch (Exception e) {
-            Log.d("Read Log", "Reading JSON failed - " + e.toString());
+            Log.d(TAG, "Reading JSON failed - " + e.toString());
             content = "There was an error.\nSorry!  Err - 4";
         }
 
@@ -284,7 +286,7 @@ public class Activity_ReadingLog extends Activity {
         dialog.show();
 
         logCurr.moveToFirst();
-        Log.d("Read Log", "Long Click done");
+        Log.d(TAG, "Long Click done");
 
     }
 
