@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -23,8 +24,12 @@ import java.util.Calendar;
 
 public class Activity_Record extends Activity {
     TextView time_end;
+
     EditText edit_text_log_name,
             edit_text_gps_time;
+
+    Button btn_power_savings,
+           btn_stop_tracking;
 
     String time = "04:00",
            log_name = "";
@@ -62,28 +67,39 @@ public class Activity_Record extends Activity {
     // TODO
     @Override
     public void onRequestPermissionsResult (int reqCode, String perms[], int[] results) {
+        Boolean allsGood = true;
+
         if (reqCode == R.string.app_name)
         {
-            for (int x = perms.length; x > 0; x--)
+            for (int x = perms.length; x > 0;)
             {
+                x--;
                 if (results[x] == PackageManager.PERMISSION_DENIED)
                 {
                     switch (perms[x])
                     {
                         case Manifest.permission.ACCESS_FINE_LOCATION:
-                            gps = false;
+                            gps = false; // Can live without it
                             break;
                         case Manifest.permission.READ_SMS:
-                            texts = false;
+                            texts = false; // Can live without it
                             break;
-                        case Manifest.permission.READ_PHONE_STATE:
-                            calls = false;
+                        case Manifest.permission.READ_PHONE_STATE: // Calls
+                            calls = false; // Can live without it
+                            break;
+                        case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                            Toast.makeText(getApplicationContext(),"This application cannot run without Storage Permissions", Toast.LENGTH_LONG)
+                                    .show();
+                            this.finish();
+                            allsGood = false;
                             break;
                     }
                 }
             }
 
-            startRecording(dirtyPassover);
+            // Stops the issue of hitting this when perms are not there for it
+            if (allsGood)
+                startRecording(dirtyPassover);
         }
     }
 
@@ -107,6 +123,8 @@ public class Activity_Record extends Activity {
         time_end = findViewById(R.id.txt_end_at);
         time_end.setText(time);
 
+
+
         // https://developer.android.com/reference/android/support/v4/content/ContextCompat.html#checkSelfPermission(android.content.Context,%20java.lang.String)
         gps = (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == 0); // See current location
         texts = (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) == 0); // Read incoming SMS
@@ -121,7 +139,8 @@ public class Activity_Record extends Activity {
     @Override
     public void finish() {
         // Do a check that the recording has ended
-        record.stopSelf();
+        if (record != null)
+            record.stopSelf();
 
         super.finish();
     }
@@ -176,8 +195,10 @@ public class Activity_Record extends Activity {
                         Log.i("Record Options", "Time Picker Done : " + time);
                         Log.d("Record Options", "Sel Hour: " + timeSelHr.toString() + ", Sel Min: " + timeSelMin.toString());
 
-                        int toRecord = ((sel_hour * 60 + sel_minute) - (currentTimes.get(Calendar.HOUR_OF_DAY) * 60  + currentTimes.get(Calendar.MINUTE)) % 1440); // (Final - Current) mod (Min in day)
-                        Log.i("Record Options", "Total Min to record: " + getString(toRecord));
+                        int toRecord = ((sel_hour * 60 + sel_minute) - (currentTimes.get(Calendar.HOUR_OF_DAY) * 60  + currentTimes.get(Calendar.MINUTE)));
+                        if (toRecord < 0)
+                            toRecord += 1440;// (Final - Current) mod (Min in day)
+                        Log.i("Record Options", "Total Min to record: " + toRecord);
                     }
                 }, hour, minute, true);
 
@@ -195,6 +216,8 @@ public class Activity_Record extends Activity {
         // trackingService(time_end content)
         setContentView(R.layout.activity_recording_active);
 
+        btn_power_savings = findViewById(R.id.btn_power_savings);
+        btn_stop_tracking = findViewById(R.id.btn_stop_tracking);
         final TextView timeRemaining = findViewById(R.id.time_remaining);
 
         // Set to time of completion
@@ -202,16 +225,22 @@ public class Activity_Record extends Activity {
 
         // Do the permissions checks here
         // If user does not allow for perms then just disable the features
+        int toRecord = ((timeSelHr * 60 + timeSelMin) - (currentTimes.get(Calendar.HOUR_OF_DAY) * 60  + currentTimes.get(Calendar.MINUTE)));
+        if (toRecord < 0) // Java's mod function is shit an doesn't mod neg numbers back into range
+            toRecord += 1440;// (Final - Current) mod (Min in day)
 
         // Intent and Starting Service
         Intent intent = new Intent("recordpls");
-        intent.putExtra("MinToLive", Integer.valueOf((timeSelHr * 60 + timeSelMin) - (currentTimes.get(Calendar.HOUR_OF_DAY) * 60  + currentTimes.get(Calendar.MINUTE)) % 1440));
+        intent.putExtra("logname", log_name);
+        intent.putExtra("MinToLive", toRecord);
         intent.putExtra("gps_time", gps_time);
         intent.putExtra("call", calls);
         intent.putExtra("sms", texts);
         intent.putExtra("gps", gps);
 
-        record = new Service_Record(this, power_saving);
+        record = new Service_Record("RecordUser");
+        record.setReq(this, power_saving);
+        // record.showNotification();
         record.onStartCommand(intent,0,R.string.app_name);
 
         // Timer I could use if I prefer
@@ -256,7 +285,7 @@ public class Activity_Record extends Activity {
 
     public void stopRecording(View view) {
         // Stop the service from running
-        record.stopSelf();
+        record.stopPls();
 
         // Back off this Activity
         this.finish();
@@ -268,7 +297,7 @@ public class Activity_Record extends Activity {
         }
         else
         {
-            // Make a dialog with more_options_dialog.xml
+            // Make a dialog with more_options_dialog.xml LOOK INTO MAKING THIS SCROLLABLE
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppThemeDialog);
 
             builder.setTitle(R.string.more_options)
@@ -299,8 +328,6 @@ public class Activity_Record extends Activity {
 
             dialog.show();
 
-            // https://stackoverflow.com/questions/37934882/onrequestpermissionsresultcallback-not-triggering-in-preferencefragment
-            // https://developer.android.com/reference/android/support/v4/app/ActivityCompat.html#requestPermissions(android.app.Activity,%20java.lang.String[],%20int)
             text_btn = dialog.findViewById(R.id.btn_Texts);
             Log.i("Record Options", "Texts is " + texts.toString());
             text_btn.setChecked(texts);
@@ -319,6 +346,11 @@ public class Activity_Record extends Activity {
             edit_text_gps_time = dialog.findViewById(R.id.editLocationPingTime);
             edit_text_gps_time.setText(String.valueOf(gps_time));
         }
+    }
+
+    public void recordingComplete() {
+        btn_power_savings.setVisibility(View.GONE);
+        btn_stop_tracking.setText(R.string.recording_complete);
     }
 
     public void powerSavings(View view) {
@@ -342,7 +374,7 @@ public class Activity_Record extends Activity {
         Log.d("Record Options", "Debug Make log action Called");
 
         AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
-        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.DATABASE_NAME,
+        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME,
                 MODE_PRIVATE, null);
         Log.d("Record Options", "Database connection established");
 
@@ -355,11 +387,11 @@ public class Activity_Record extends Activity {
         Log.d("Record Options", "Debug Make logs Called");
 
         AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
-        SQLiteDatabase debugDatabase = this.openOrCreateDatabase(debugHelp.DATABASE_NAME,
+        SQLiteDatabase debugDatabase = getApplication().openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME,
                                                                         MODE_PRIVATE,null);
         Log.d("Record Options", "Database connection established");
 
-        debugHelp.makeNewLog(debugDatabase, "fake news");
+        debugHelp.makeNewLog(debugDatabase, "fake news", null);
         Log.d("Record Options", "Debug logs made");
     }
 }

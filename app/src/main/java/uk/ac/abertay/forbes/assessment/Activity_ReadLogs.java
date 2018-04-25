@@ -1,10 +1,14 @@
 package uk.ac.abertay.forbes.assessment;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -32,6 +36,32 @@ public class Activity_ReadLogs extends Activity {
 
     Cursor logs;
 
+    public void onRequestPermissionsResult (int reqCode, @NonNull String perms[], @NonNull int[] results) {
+        if (reqCode == R.string.app_name) {
+            for (int x = perms.length; x > 0; ) {
+                x--;
+                if (results[x] == PackageManager.PERMISSION_DENIED) {
+                    switch (perms[x]) {
+                        case Manifest.permission.READ_EXTERNAL_STORAGE:
+                            Toast.makeText(getApplicationContext(), "This application cannot run without Storage Permissions", Toast.LENGTH_LONG)
+                                    .show();
+                            this.finish();
+                            break;
+                    }
+                }
+                else
+                {
+                    db = getApplication().openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME, MODE_PRIVATE, null);
+                    // ON CREATE SHOULD CALL HERE!!!
+                    dh = new AsyncDatabaseHelper(this);
+                    // BUT IT STILL HAS TO BE CALLED HERE
+                    dh.onCreate(db);
+                    dh.readLogs(db, this);
+                }
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,13 +70,19 @@ public class Activity_ReadLogs extends Activity {
         delLogs = findViewById(R.id.btn_delete_toggle);
         lv = findViewById(R.id.list_logs);
 
-        db = this.openOrCreateDatabase(dh.DATABASE_NAME, MODE_PRIVATE, null);
+        Boolean READ = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == 0;
 
-        dh = new AsyncDatabaseHelper(this); // ON CREATE SHOULD CALL HERE
-
-        dh.onCreate(db); // TODO SO WHY DOES NOT DOING THIS MAKE MY APP NOT WORK ?
-
-        dh.readLogs(db, this);
+        Log.d("Read Options", "Read permissions " + READ.toString());
+        if (READ) {
+            db = getApplication().openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME, MODE_PRIVATE, null);
+            dh = new AsyncDatabaseHelper(this); // ON CREATE SHOULD CALL HERE
+            dh.onCreate(db);
+            dh.readLogs(db, this);
+        }
+        else
+        {
+            requestPermissions(new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, R.string.app_name);
+        }
 
         Log.d("Read Options", "Successful Launch");
     }
@@ -107,7 +143,7 @@ public class Activity_ReadLogs extends Activity {
 
     public void dummyPopulate(int repopulate) {
         Log.d("Read Options", "Dummy Populate Called");
-        List<String> dummyValues = new ArrayList<String>();
+        List<String> dummyValues = new ArrayList<>();
 
         dummyValues.add("No Responses");
         dummyValues.add("List item Spam");
@@ -118,7 +154,7 @@ public class Activity_ReadLogs extends Activity {
             dummyValues.remove(repopulate);
         }
 
-        arrayAdapter = new ArrayAdapter<String> (this,
+        arrayAdapter = new ArrayAdapter<> (this,
                 android.R.layout.simple_list_item_1,
                 dummyValues);
 
@@ -130,7 +166,7 @@ public class Activity_ReadLogs extends Activity {
         // dataset anyway so what's the point in keeping old data in memory
         Log.d("Read Options", "Populate Called");
 
-        List<String> values = new ArrayList<String>();
+        List<String> values = new ArrayList<>();
 
         logs.moveToFirst();
 
@@ -173,5 +209,4 @@ public class Activity_ReadLogs extends Activity {
         intent.putExtra("log", id);
         startActivity(intent);
     }
-
 }

@@ -3,33 +3,33 @@ package uk.ac.abertay.forbes.assessment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.telecom.Call;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import java.util.Date;
 import java.util.Objects;
 
 public class CallReceiver extends PhonecallReceiver {
 
-    Service_Record parent;
+    private Service_Record parent = null;
 
-    public void getParent(Service_Record sr) {
+    public void setReq(Service_Record sr) {
         parent = sr;
     }
 
     @Override
     protected void onIncomingCallEnded(Context context, String number, Date start, Date end) {
-        parent.gotACall(number, false,start);
+        parent.gotACall(number,false, start);
     }
 
     @Override
     protected void onOutgoingCallEnded(Context context, String number, Date start, Date end) {
-        parent.gotACall(number, true, start);
+        parent.gotACall(number,true, start);
     }
 
     @Override
     protected void onMissedCall(Context context, String number, Date end) {
-        parent.gotACall(number, false, null);
+        parent.gotACall(number,false,null);
     }
 
 }
@@ -47,6 +47,7 @@ abstract class PhonecallReceiver  extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d("Call Record", "On Receive Triggered");
 
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
         if (Objects.equals(intent.getAction(), "android.intent.action.NEW_OUTGOING_CALL")) {

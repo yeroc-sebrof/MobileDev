@@ -17,11 +17,12 @@ public class IncomingSms extends BroadcastReceiver {
     // Get the object of SmsManager
     final SmsManager sms = SmsManager.getDefault();
 
-    public void getParent(Service_Record sr) {
+    public void setParent(Service_Record sr) {
         parent = sr;
     }
 
     public void onReceive(Context context, Intent intent) {
+        Log.d("SMS Record", "On Receive Triggered");
 
         // Retrieves a map of extended data from the intent.
         final Bundle bundle = intent.getExtras();

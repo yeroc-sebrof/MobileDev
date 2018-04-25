@@ -80,12 +80,12 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
     }
 
     void debugAddActions(SQLiteDatabase db) {
-        readIndexLastLog asyncTask = new readIndexLastLog(db);
+        debugActivities asyncTask = new debugActivities(db);
         asyncTask.execute();
     }
 
-    void makeNewLog(SQLiteDatabase db, String name) {
-        asyncNewLog asyncTask = new asyncNewLog(db, name);
+    void makeNewLog(SQLiteDatabase db, String name, Service_Record parent) {
+        asyncNewLog asyncTask = new asyncNewLog(db, name, parent);
         asyncTask.execute();
     }
 
@@ -133,10 +133,10 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    class readIndexLastLog extends AsyncTask<Void, Void, Void> {
+    class debugActivities extends AsyncTask<Void, Void, Void> {
         private SQLiteDatabase db;
 
-        readIndexLastLog(SQLiteDatabase database)
+        debugActivities(SQLiteDatabase database)
         {
             Log.d("Database Helper", "Activity_ReadLogs task created");
             db = database;
@@ -158,6 +158,9 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
 
             newActivity(db, lastLog.getInt(0), 2,
                     "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":true,\n\t\"content\":\"Of Course!\"\n}");
+
+            newActivity(db, lastLog.getInt(0), 2,
+                    "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":true,\n\t\"content\":\"I'm gonna spam you with a massive message for tesing purposes\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThat Cool?\"\n}");
 
             lastLog.close();
             return null;
@@ -257,14 +260,17 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    class asyncNewLog extends AsyncTask<Void, Void, Void> {
+    class asyncNewLog extends AsyncTask<Void, Void, Integer> {
         private SQLiteDatabase db;
         private ContentValues insertValue = new ContentValues(0);
+        Service_Record SR_ptr;
 
-        asyncNewLog(SQLiteDatabase database, String name)
+        asyncNewLog(SQLiteDatabase database, String name, Service_Record calledBy)
         {
             Log.d("Database Helper", "Make new log created");
             db = database;
+
+            SR_ptr = calledBy;
 
             // For the sake of readability would prefer none to be null
             if (name.equals("")) { name = null; }
@@ -273,7 +279,8 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Integer doInBackground(Void... voids) {
+            Integer logIs;
             Log.d("Database Helper", "Make new log called");
             db.insert(HANDLER_TABLE_NAME,
                     null,
@@ -286,9 +293,11 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
                     null, null, null, null,
                     COLUMN_ID + " DESC", "1");
             logNo.moveToFirst();
+            logIs = logNo.getInt(0);
+            logNo.close();
 
             // Make a new log table
-            String CREATE_LOG = "CREATE TABLE IF NOT EXISTS " + LOG + logNo.getString(0)
+            String CREATE_LOG = "CREATE TABLE IF NOT EXISTS " + LOG + logIs.toString()
                     + "( "
                     + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + COLUMN_TYPE + " INT NOT NULL,"
@@ -299,11 +308,17 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
 
             db.execSQL(CREATE_LOG);
 
-            // Get a GPS point?
+            Log.d("Database Helper", "Done making new log" + logIs);
+            return logIs;
+        }
 
-            logNo.close();
-            Log.d("Database Helper", "Done making new log");
-            return null;
+        @Override
+        protected void onPostExecute(Integer log) {
+            if (SR_ptr != null){
+                Log.d("Database Helper", "New log Post Exe");
+                SR_ptr.logid = log;
+                SR_ptr.setupListeners();
+            }
         }
     }
 }

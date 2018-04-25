@@ -1,8 +1,10 @@
 package uk.ac.abertay.forbes.assessment;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -23,29 +25,66 @@ import java.util.List;
 public class Activity_ReadingLog extends Activity {
     int log;
 
-    TextView readingLog;
+    TextView txt_currentActivity;
 
     AsyncDatabaseHelper dh;
     SQLiteDatabase db;
 
     ArrayAdapter<String> arrayAdapter;
-    ListView logV;
+    ListView log_view;
+
+    Boolean contactsPerm; // Still gonna check but I wont ask
 
     Cursor logCurr;
+
+    @Override // Will be used if I start asking for contacts
+    public void onRequestPermissionsResult (int reqCode, String perms[], int[] results) {
+        if (reqCode == R.string.app_name)
+        {
+            for (int x = perms.length; x > 0;)
+            {
+                x--;
+                if (results[x] == PackageManager.PERMISSION_DENIED)
+                {
+                    switch (perms[x])
+                    {
+                        case Manifest.permission.READ_EXTERNAL_STORAGE:
+                            Toast.makeText(getApplicationContext(),"This application cannot run without Storage Permissions", Toast.LENGTH_LONG)
+                                    .show();
+                            this.finish();
+                            break;
+
+                        case Manifest.permission.READ_CONTACTS:
+                            contactsPerm = true;
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (perms[x])
+                    {
+                        case Manifest.permission.READ_CONTACTS:
+                            contactsPerm = true;
+                            break;
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading_log);
 
-        logV = findViewById(R.id.log_view);
-        readingLog = findViewById(R.id.txt_currentActivity);
+        log_view = findViewById(R.id.log_view);
+        txt_currentActivity = findViewById(R.id.txt_currentActivity);
 
         try {
             log = getIntent().getExtras().getInt("log");
             Log.d("Read Log", "Reading " + log);
 
-            readingLog.append(" Log " + log);
+            txt_currentActivity.append(" Log " + log);
         }
         catch (Exception e) {
             Log.e("Read Log", "Intent failed to include an Int - " + e.toString());
@@ -53,7 +92,7 @@ public class Activity_ReadingLog extends Activity {
         }
 
         try {
-            db = this.openOrCreateDatabase(dh.DATABASE_NAME, MODE_PRIVATE, null);
+            db = this.openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME, MODE_PRIVATE, null);
             dh = new AsyncDatabaseHelper(this);
         }
         catch (Exception e) {
@@ -64,6 +103,10 @@ public class Activity_ReadingLog extends Activity {
         }
 
         dh.readLog(db, log,this);
+
+        // TODO, Uncomment this if you want to read the contacts
+        // if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_CONTACTS) != 0) requestPermissions(new String[] {Manifest.permission.READ_CONTACTS}, R.string.app_name);
+        // else contactsPerm = true;
 
         Log.d("Read Log", "Successful Launch");
     }
@@ -88,9 +131,9 @@ public class Activity_ReadingLog extends Activity {
         arrayAdapter = new ArrayAdapter<String>
                 (this, android.R.layout.simple_list_item_1, logViewValues);
 
-        logV.setAdapter(arrayAdapter);
+        log_view.setAdapter(arrayAdapter);
 
-        logV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        log_view.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position, long id) {
                 takeItemFurther(view, position);
@@ -165,6 +208,7 @@ public class Activity_ReadingLog extends Activity {
                         Log.d("Read Log", "Lat/Long didnt work");
                         content = "There was an error.\nSorry!  Err - 1";
                     }
+                    content += "\n\n" + "Timestamp: " + logCurr.getString(2);
                     break;
                 case 1:
                     try {
@@ -177,13 +221,24 @@ public class Activity_ReadingLog extends Activity {
 
                         content += JSONParser.getString("contact") + "\n";
 
-                        content+="\nCall Start - " + JSONParser.getString("start") +
-                              "\nCall End - " + JSONParser.getString("end");
+//                        if (contactsPerm) {
+//                            content += "\n"; // TODO LOOK INTO A EASIER METHOD OF QUERYING EXISTING CONTACTS
+//                        }                    // https://stackoverflow.com/questions/3505865/android-check-phone-number-present-in-contact-list-phone-number-retrieve-fr
+                        if (JSONParser.getString("start").equals("none"))
+                        {
+                            content += "\nMissed Call - " + logCurr.getString(2);
+                        }
+                        else
+                        {
+                            content += "\nCall Start - " + JSONParser.getString("start");
+                            content += "\nCall End - " + logCurr.getString(2);
+                        }
                     }
                     catch (Exception e) {
                         // This ones the most likely fuck up
                         Log.d("Read Log", "Contact/Outbound/Start/End didn't work");
                         content = "There was an error.\nSorry!  Err - 2";
+                        content += "\n\n" + "Timestamp: " + logCurr.getString(2);
                     }
                     break;
                 case 2:
@@ -197,16 +252,19 @@ public class Activity_ReadingLog extends Activity {
 
                         content += JSONParser.getString("contact") + "\n";
 
+//                        if (contactsPerm) {
+//                            content += "\n"; // TODO LOOK INTO A EASIER METHOD OF QUERYING EXISTING CONTACTS
+//                        }                    // https://stackoverflow.com/questions/3505865/android-check-phone-number-present-in-contact-list-phone-number-retrieve-fr
+
                         content+="\nContent:\n\n" + JSONParser.getString("content");
                     }
                     catch (Exception e) {
                         Log.d("Read Log", "Contact/Outbound/Content didn't work");
                         content = "There was an error.\nSorry!  Err - 3";
                     }
+                    content += "\n\n" + "Timestamp: " + logCurr.getString(2);
                     break;
             }
-
-            content += "\n\n" + "Timestamp: " + logCurr.getString(2);
         }
         catch (Exception e) {
             Log.d("Read Log", "Reading JSON failed - " + e.toString());
