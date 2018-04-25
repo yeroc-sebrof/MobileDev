@@ -51,7 +51,7 @@
     android:layout_marginBottom="48dp"
     android:layout_marginEnd="8dp"
     android:layout_marginStart="8dp"
-    android:text="@string/time_remaining"
+    android:text="@string/time_ending"
     android:textAlignment="center"
     android:textSize="24sp"
     app:layout_constraintBottom_toTopOf="@+id/btn_power_savings"
