@@ -92,12 +92,19 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         asyncTask.execute();
     }
 
-    void newActivity (SQLiteDatabase db, int id, int type, String content) {
+    void newActivity(SQLiteDatabase db, int type, String content) {
+        Cursor lastLog = db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID},
+                null, null, null, null,
+                COLUMN_ID + " DESC", "1");
+
+        lastLog.moveToNext();
+
         // If this should only be called in a activity does it need to be made async?
         ContentValues insertValue = new ContentValues(0);
         insertValue.put(COLUMN_TYPE, type);
         insertValue.put(COLUMN_CONTENT, content);
-        db.insert(LOG + id, null, insertValue);
+        db.insert(LOG + lastLog.getInt(0), null, insertValue);
+        lastLog.close();
     }
 
     void deleteLog(SQLiteDatabase db, int id) {
@@ -105,14 +112,15 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         asyncTask.execute(id);
     }
 
-    public String [] getTYPES()
-    { return TYPES; }
+    public String[] getTYPES() {
+        return TYPES;
+    }
 
+    @SuppressLint("StaticFieldLeak")
     class asyncOnUpgrade extends AsyncTask<Void, Void, Void> {
         private SQLiteDatabase db;
 
-        asyncOnUpgrade(SQLiteDatabase database)
-        {
+        asyncOnUpgrade(SQLiteDatabase database) {
             Log.d(TAG, "Activity_ReadLogs task created");
             db = database;
         }
@@ -140,33 +148,24 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
     class debugActivities extends AsyncTask<Void, Void, Void> {
         private SQLiteDatabase db;
 
-        debugActivities(SQLiteDatabase database)
-        {
+        debugActivities(SQLiteDatabase database) {
             Log.d("Database Helper", "Activity_ReadLogs task created");
             db = database;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            Cursor lastLog =  db.query(HANDLER_TABLE_NAME, new String[]{COLUMN_ID},
-                    null, null, null, null,
-                    COLUMN_ID + " DESC", "1");
-
-            lastLog.moveToNext();
-
-            newActivity(db, lastLog.getInt(0), 1,
+            newActivity(db, 1,
                     "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":false,\n\t\"start\":\"Alpha\",\n\t\"end\":\"Omega\"\n}");
 
-            newActivity(db, lastLog.getInt(0), 2,
+            newActivity(db, 2,
                     "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":false,\n\t\"content\":\"Get a bottle of Morgans on the way back\"\n}");
 
-            newActivity(db, lastLog.getInt(0), 2,
+            newActivity(db, 2,
                     "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":true,\n\t\"content\":\"Of Course!\"\n}");
 
-            newActivity(db, lastLog.getInt(0), 2,
+            newActivity(db, 2,
                     "{\n\t\"contact\":\"The Captain\",\n\t\"outbound\":true,\n\t\"content\":\"I'm gonna spam you with a massive message for tesing purposes\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThat Cool?\"\n}");
-
-            lastLog.close();
             return null;
         }
     }
@@ -174,8 +173,8 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
     @SuppressLint("StaticFieldLeak")
     class asyncReadLog extends AsyncTask<Integer, Void, Cursor> {
         private SQLiteDatabase db;
-        asyncReadLog(SQLiteDatabase database)
-        {
+
+        asyncReadLog(SQLiteDatabase database) {
             Log.d(TAG, "ReadLog task created");
             db = database;
         }
@@ -183,7 +182,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         @Override
         protected Cursor doInBackground(Integer... ints) {
             return db.query(LOG + ints[0],
-                    new String[] {COLUMN_TYPE, COLUMN_CONTENT, COLUMN_TIMESTAMP},
+                    new String[]{COLUMN_TYPE, COLUMN_CONTENT, COLUMN_TIMESTAMP},
                     null, null, null, null,
                     COLUMN_ID + " ASC",
                     null);
@@ -208,7 +207,7 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         protected Cursor doInBackground(Void... voids) {
 
             return db.query(HANDLER_TABLE_NAME,
-                    new String[]{ COLUMN_ID, LOG, COLUMN_TIMESTAMP },
+                    new String[]{COLUMN_ID, LOG, COLUMN_TIMESTAMP},
                     null, null, null, null,
                     COLUMN_ID + " ASC",
                     null);
@@ -223,8 +222,8 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
     @SuppressLint("StaticFieldLeak")
     class asyncResetLogs extends AsyncTask<Void, Void, Cursor> {
         private SQLiteDatabase db;
-        asyncResetLogs(SQLiteDatabase database)
-        {
+
+        asyncResetLogs(SQLiteDatabase database) {
             Log.d(TAG, "Activity_ReadLogs task created");
             db = database;
         }
@@ -247,8 +246,8 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
     @SuppressLint("StaticFieldLeak")
     class asyncDelLog extends AsyncTask<Integer, Void, Void> {
         private SQLiteDatabase db;
-        asyncDelLog(SQLiteDatabase database)
-        {
+
+        asyncDelLog(SQLiteDatabase database) {
             Log.d(TAG, "Delete Log created");
             db = database;
         }
@@ -257,38 +256,40 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
         protected Void doInBackground(Integer... ints) {
             String del = "DROP TABLE IF EXISTS " + LOG + ints[0] + ";";
             db.execSQL(del);
-            Log.d(TAG,"Dropped Table Log " + ints[0]);
+            Log.d(TAG, "Dropped Table Log " + ints[0]);
 
             db.delete(HANDLER_TABLE_NAME,
                     COLUMN_ID + "=" + ints[0],
                     null);
-            Log.d(TAG,"Removed Index ID " + ints[0]);
+            Log.d(TAG, "Removed Index ID " + ints[0]);
 
             return null;
         }
     }
 
     @SuppressLint("StaticFieldLeak")
-    class asyncNewLog extends AsyncTask<Void, Void, Integer> {
+    class asyncNewLog extends AsyncTask<Void, Void, Void> {
         private SQLiteDatabase db;
         private ContentValues insertValue = new ContentValues(0);
-        Service_Record SR_ptr;
 
-        asyncNewLog(SQLiteDatabase database, String name, Service_Record calledBy)
-        {
+        private Service_Record calledBy;
+
+        asyncNewLog(SQLiteDatabase database, String name, Service_Record called) {
             Log.d(TAG, "Make new log created");
             db = database;
 
-            SR_ptr = calledBy;
-
             // For the sake of readability would prefer none to be null
-            if (name.equals("")) { name = null; }
+            if (name.equals("")) {
+                name = null;
+            }
             insertValue.put(LOG, name);
+
+            calledBy = called;
             Log.d(TAG, "Value Inserted to Index");
         }
 
         @Override
-        protected Integer doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
             Integer logIs;
             Log.d(TAG, "Make new log called");
             db.insert(HANDLER_TABLE_NAME,
@@ -318,18 +319,17 @@ public class AsyncDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(CREATE_LOG);
 
             Log.d(TAG, "Done making new log" + logIs);
-            return logIs;
+
+            return null;
         }
 
         @Override
-        protected void onPostExecute(Integer log) {
-            if (SR_ptr != null){
-                Log.d(TAG, "New log Post Exe");
-                SR_ptr.log_id = log;
-                SR_ptr.setupListeners();
-            }
+        protected void onPostExecute(Void aVoid) {
+            calledBy.setupListeners();
+            super.onPostExecute(aVoid);
         }
     }
 }
+
 
 
