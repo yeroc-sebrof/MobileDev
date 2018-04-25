@@ -15,7 +15,7 @@
         android:contentDescription="@string/captains_image"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/a" />
+        android:src="@drawable/cpt" />
 
     <TextView
         android:id="@+id/text_cpt_log"
@@ -23,8 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="64dp"
-        android:text="@string/captains_log"
+        android:layout_marginTop="48dp"
+        android:text="@string/app_name"
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,26 +32,57 @@
         app:layout_constraintStart_toEndOf="@+id/img_cap"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/btn_start_at"
-        android:layout_width="190dp"
+    <TextView
+        android:id="@+id/txt_currentActivity"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/recording_settings"
+        app:layout_constraintEnd_toEndOf="@+id/text_cpt_log"
+        app:layout_constraintStart_toStartOf="@+id/text_cpt_log"
+        app:layout_constraintTop_toBottomOf="@+id/text_cpt_log" />
+
+    <Button
+        android:id="@+id/btn_end_at"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
-        android:text="@string/start_at"
+        android:onClick="endAt"
+        android:text="@string/end_at"
+        android:textColor="@color/captains_yellow"
         app:layout_constraintBottom_toTopOf="@+id/btn_start_tracking"
+        app:layout_constraintEnd_toStartOf="@+id/txt_end_at"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/txt_end_at"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_end_at"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btn_end_at" />
 
     <Button
         android:id="@+id/btn_more_options"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:onClick="moreOptions"
         android:text="@string/more_options"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="@color/captains_yellow"
+        app:layout_constraintBottom_toTopOf="@+id/btn_end_at"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
@@ -59,20 +90,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:onClick="callRecording"
         android:text="@string/start_tracking"
-        app:layout_constraintBottom_toTopOf="@+id/btn_more_options"
+        android:textColor="@color/captains_yellow"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
-        android:id="@+id/btn_end_at"
-        android:layout_width="190dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/end_at"
-        app:layout_constraintBottom_toTopOf="@+id/btn_start_tracking"
-        app:layout_constraintEnd_toEndOf="parent" />
 </android.support.constraint.ConstraintLayout>

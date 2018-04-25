@@ -1,11 +1,35 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimaryDark">@color/captains_yellow</item>
+        <item name="colorAccent">@color/captains_blue</item>
+
+        <item name="android:windowBackground">@color/captains_yellow</item>
+
+        <item name="colorPrimary">@color/captains_red</item>
+
+        <item name="android:textColor">@color/captains_red</item>
+
+        <item name="android:navigationBarColor">@android:color/background_dark</item>
+        <item name="android:colorButtonNormal">@color/captains_blue</item>
+        <item name="android:colorBackground">@color/captains_red</item>
+
+        <!-- This is needed for TimePickerDialog -->
+        <item name="android:dialogTheme">@style/AppThemeDialog</item>
+    </style>
+
+    <style name="AppThemeDialog" parent="android:Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" >
+        <!--Overwrite text colour from above-->
+        <item name="android:textColor">@color/captains_yellow</item>
+
+        <item name="android:colorAccent">@color/captains_red</item>
+        <item name="android:textColorPrimary">@color/captains_yellow</item>
+        <item name="android:textColorSecondary">@color/captains_yellow</item>
+        <item name="android:textColorPrimaryInverse">@color/captains_yellow</item>
+        <item name="android:textColorSecondaryInverse">@color/captains_yellow</item>
+        <item name="android:colorForeground">@color/captains_yellow</item>
     </style>
 
 </resources>

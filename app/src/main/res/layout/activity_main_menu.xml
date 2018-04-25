@@ -8,20 +8,21 @@
 
     <ImageView
         android:id="@+id/img_cap"
-        android:layout_width="0dp"
-        android:layout_height="408dp"
+        android:layout_width="wrap_content"
+        android:layout_height="390dp"
         android:contentDescription="@string/captains_image"
+        android:onClick="debugPoke"
+        android:src="@drawable/cpt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/a" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/text_cpt_log"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="@string/captains_log"
+        android:text="@string/app_name"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,14 +32,16 @@
         android:id="@+id/btn_new_log"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:onClick="make"
         android:text="@string/new_log"
+        android:textColor="@color/captains_yellow"
+        app:layout_constraintBottom_toTopOf="@+id/btn_review_log"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_cpt_log" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btn_review_log"
@@ -47,11 +50,11 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:onClick="read"
         android:text="@string/review_log"
+        android:textColor="@color/captains_yellow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_new_log" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

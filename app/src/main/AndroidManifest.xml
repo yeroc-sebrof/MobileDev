@@ -2,20 +2,73 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.ac.abertay.forbes.assessment">
 
+    <uses-feature android:name="android.hardware.location"/>
+    <uses-feature android:name="android.hardware.location.gps"/> <!-- SUB API 20-->
+    <!--Location Hardware should not be called by 3rd party-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <uses-feature android:name="android.hardware.telephony"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/> <!-- This is only if log doesnt tell us what we need to know about calls -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+
+    <uses-feature android:name="android.database"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/cpt"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/cpt"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".OpenScreen">
+
+        <activity android:name=".Activity_OpenScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".Activity_Record" android:configChanges="orientation|screenSize"/>
+
+        <activity android:name=".Activity_ReadLogs"/>
+
+        <activity android:name=".Activity_ReadingLog"/>
+
+        <service android:name=".Service_Record"
+            android:enabled="true"
+            android:isolatedProcess="false"
+            android:process=":remote"/>
+
+        <!--These kind of work but not as intended. Encase they are needed I'd rather just comment them out-->
+        <!--<receiver android:name=".IncomingSms"-->
+            <!--android:permission="android.permission.BROADCAST_SMS">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.provider.Telephony.SMS_RECEIVED" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+
+        <!--<receiver android:name=".CallReceiver" >-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.PHONE_STATE" />-->
+            <!--</intent-filter>-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.NEW_OUTGOING_CALL" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+
     </application>
 
 </manifest>
+
+<!--
+    TODO LIST
+        Make queries Async
+        Make Service for logging activities
+        Make Debug gestures
+        Make Google Maps Activity that can be swiped to from Offscreen swipe Left/Right
+-->
