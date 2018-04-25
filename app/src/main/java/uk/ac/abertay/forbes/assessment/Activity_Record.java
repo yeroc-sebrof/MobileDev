@@ -25,6 +25,8 @@ import java.util.Calendar;
 public class Activity_Record extends Activity {
     TextView time_end;
 
+    private static final String TAG = "Record Options";
+
     EditText edit_text_log_name,
             edit_text_gps_time;
 
@@ -133,7 +135,7 @@ public class Activity_Record extends Activity {
         // Error here is null as debug will always be passed
         debug = getIntent().getExtras().getBoolean("debug");
 
-        Log.d("Record Options", "Successful Launch");
+        Log.d(TAG, "Successful Launch");
     }
 
     @Override
@@ -169,7 +171,7 @@ public class Activity_Record extends Activity {
 
         final int hour = currentTimes.get(Calendar.HOUR_OF_DAY);
         final int minute = currentTimes.get(Calendar.MINUTE);
-        Log.d("Record Options","Current Time - " + hour + ":" + minute);
+        Log.d(TAG,"Current Time - " + hour + ":" + minute);
 
         TimePickerDialog timePicker =
                 new TimePickerDialog(this, R.style.AppThemeDialog, new TimePickerDialog.OnTimeSetListener() {
@@ -192,18 +194,18 @@ public class Activity_Record extends Activity {
                         timeSelHr = sel_hour;
                         timeSelMin = sel_minute;
                         time_end.setText(time);
-                        Log.i("Record Options", "Time Picker Done : " + time);
-                        Log.d("Record Options", "Sel Hour: " + timeSelHr.toString() + ", Sel Min: " + timeSelMin.toString());
+                        Log.i(TAG, "Time Picker Done : " + time);
+                        Log.d(TAG, "Sel Hour: " + timeSelHr.toString() + ", Sel Min: " + timeSelMin.toString());
 
                         int toRecord = ((sel_hour * 60 + sel_minute) - (currentTimes.get(Calendar.HOUR_OF_DAY) * 60  + currentTimes.get(Calendar.MINUTE)));
                         if (toRecord < 0)
                             toRecord += 1440;// (Final - Current) mod (Min in day)
-                        Log.i("Record Options", "Total Min to record: " + toRecord);
+                        Log.i(TAG, "Total Min to record: " + toRecord);
                     }
                 }, hour, minute, true);
 
         timePicker.show();
-        Log.d("Record Options", "Time Picker Dialog displayed");
+        Log.d(TAG, "Time Picker Dialog displayed");
     }
 
     public void startRecording(View view) {
@@ -329,15 +331,15 @@ public class Activity_Record extends Activity {
             dialog.show();
 
             text_btn = dialog.findViewById(R.id.btn_Texts);
-            Log.i("Record Options", "Texts is " + texts.toString());
+            Log.i(TAG, "Texts is " + texts.toString());
             text_btn.setChecked(texts);
 
             call_btn = dialog.findViewById(R.id.btn_Calls);
-            Log.i("Record Options", "Calls is " + calls.toString());
+            Log.i(TAG, "Calls is " + calls.toString());
             call_btn.setChecked(calls);
 
             gps_btn = dialog.findViewById(R.id.btn_GPS);
-            Log.i("Record Options", "Locations is " + gps.toString());
+            Log.i(TAG, "Locations is " + gps.toString());
             gps_btn.setChecked(gps);
 
             edit_text_log_name = dialog.findViewById(R.id.editLogname);
@@ -371,27 +373,27 @@ public class Activity_Record extends Activity {
     }
 
     public void debugMakeItemInLog(View view) {
-        Log.d("Record Options", "Debug Make log action Called");
+        Log.d(TAG, "Debug Make log action Called");
 
         AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
         SQLiteDatabase debugDatabase = this.openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME,
                 MODE_PRIVATE, null);
-        Log.d("Record Options", "Database connection established");
+        Log.d(TAG, "Database connection established");
 
         debugHelp.debugAddActions(debugDatabase);
 
-        Log.d("Record Options", "Debug log items added");
+        Log.d(TAG, "Debug log items added");
     }
 
     public void debugMakeLogs(View view) {
-        Log.d("Record Options", "Debug Make logs Called");
+        Log.d(TAG, "Debug Make logs Called");
 
         AsyncDatabaseHelper debugHelp = new AsyncDatabaseHelper(this);
         SQLiteDatabase debugDatabase = getApplication().openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME,
                                                                         MODE_PRIVATE,null);
-        Log.d("Record Options", "Database connection established");
+        Log.d(TAG, "Database connection established");
 
         debugHelp.makeNewLog(debugDatabase, "fake news", null);
-        Log.d("Record Options", "Debug logs made");
+        Log.d(TAG, "Debug logs made");
     }
 }
