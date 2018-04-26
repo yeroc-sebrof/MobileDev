@@ -23,39 +23,18 @@ public class SmsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        String smsSender = "";
+        String smsBody = "";
+
         if (intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
-            String smsSender = "";
-            String smsBody = "";
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 for (SmsMessage smsMessage : Telephony.Sms.Intents.getMessagesFromIntent(intent)) {
                     smsSender = smsMessage.getDisplayOriginatingAddress();
                     smsBody += smsMessage.getMessageBody();
                 }
-            } else { // Old way to do this that shouldn't be called given the version Im working for
-                Bundle smsBundle = intent.getExtras();
-                if (smsBundle != null) {
-                    Object[] pdus = (Object[]) smsBundle.get("pdus");
-                    if (pdus == null) {
-                        // Display some error to the user
-                        Log.e(TAG, "SmsBundle had no pdus key");
-                        return;
-                    }
-                    SmsMessage[] messages = new SmsMessage[pdus.length];
-                    for (int i = 0; i < messages.length; i++) {
-                        messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                        smsBody += messages[i].getMessageBody();
-                    }
-                    smsSender = messages[0].getOriginatingAddress();
-                }
-            }
+        }
 
-            if (listener != null) {
-                listener.onTextReceived(smsSender, smsBody);
-            }
-
-            SQLiteDatabase db = context.openOrCreateDatabase(AsyncDatabaseHelper.DATABASE_NAME, Context.MODE_PRIVATE, null);
-            AsyncDatabaseHelper dh = new AsyncDatabaseHelper(context);
-            dh.newActivity(db, 2,"{\n\t\"contact\":\"" + smsSender + "\",\n\t\"outbound\":false\n\t\"content\":\"" + smsBody + "\"\n}");
+        if (listener != null) {
+            listener.onTextReceived(smsSender, smsBody);
         }
     }
 
