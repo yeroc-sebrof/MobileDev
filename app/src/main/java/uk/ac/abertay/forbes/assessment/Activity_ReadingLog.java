@@ -273,7 +273,7 @@ public class Activity_ReadingLog extends Activity {
             content = "There was an error.\nSorry!  Err - 4";
         }
 
-        final AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppThemeDialog).create();
+        final AlertDialog dialog = new AlertDialog.Builder(this, R.style.CptAppThemeDialog).create();
         dialog.setTitle(dh.TYPES[logCurr.getInt(0)]);
         dialog.setMessage(content);
         dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Cool Beans!",
