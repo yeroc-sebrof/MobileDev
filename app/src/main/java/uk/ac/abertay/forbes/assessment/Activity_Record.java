@@ -174,7 +174,7 @@ public class Activity_Record extends Activity {
         Log.d(TAG,"Current Time - " + hour + ":" + minute);
 
         TimePickerDialog timePicker =
-                new TimePickerDialog(this, R.style.AppThemeDialog, new TimePickerDialog.OnTimeSetListener() {
+                new TimePickerDialog(this, R.style.CptAppThemeDialog, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int sel_hour, int sel_minute) {
                         if (sel_hour < 10) {
@@ -300,7 +300,7 @@ public class Activity_Record extends Activity {
         else
         {
             // Make a dialog with more_options_dialog.xml LOOK INTO MAKING THIS SCROLLABLE
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppThemeDialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CptAppThemeDialog);
 
             builder.setTitle(R.string.more_options)
                     .setView(R.layout.more_options_dialog)
