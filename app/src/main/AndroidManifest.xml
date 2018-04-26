@@ -24,7 +24,7 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/cpt"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/CptAppTheme">
 
         <activity android:name=".Activity_OpenScreen">
             <intent-filter>
@@ -45,7 +45,7 @@
             android:process=":remote"/>
 
         <!--These kind of work but not as intended. Encase they are needed I'd rather just comment them out-->
-        <!--<receiver android:name=".IncomingSms"-->
+        <!--<receiver android:name=".SmsReceiver"-->
             <!--android:permission="android.permission.BROADCAST_SMS">-->
             <!--<intent-filter>-->
                 <!--<action android:name="android.provider.Telephony.SMS_RECEIVED" />-->
