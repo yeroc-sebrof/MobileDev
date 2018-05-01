@@ -1,31 +1,34 @@
 package uk.ac.abertay.forbes.assessment;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
+@SuppressLint("SimpleDateFormat")
 public class CallReceiver extends PhonecallReceiver {
 
     private Listener listener;
 
     @Override
     protected void onIncomingCallEnded(Context context, String number, Date start, Date end) {
-        if (listener != null) listener.onCallReceived(number,false, start);
+        if (listener != null) listener.onCallReceived(number,false, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(start));
     }
 
     @Override
     protected void onOutgoingCallEnded(Context context, String number, Date start, Date end) {
-        if (listener != null) listener.onCallReceived(number,true, start);
+        if (listener != null) listener.onCallReceived(number,true, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(start));
     }
 
     @Override
     protected void onMissedCall(Context context, String number, Date end) {
-        if (listener != null) listener.onCallReceived(number,false, new Date());
+        if (listener != null) listener.onCallReceived(number,false, "none");
     }
 
     void setListener(Listener listener) {
@@ -33,7 +36,7 @@ public class CallReceiver extends PhonecallReceiver {
     }
 
     interface Listener {
-        void onCallReceived(String number, Boolean outbound, Date start);
+        void onCallReceived(String number, Boolean outbound, String start);
     }
 }
 

@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="CptAppTheme" parent="Theme.AppCompat.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimaryDark">@color/captains_yellow</item>
         <item name="colorAccent">@color/captains_blue</item>
@@ -17,10 +17,10 @@
         <item name="android:colorBackground">@color/captains_red</item>
 
         <!-- This is needed for TimePickerDialog -->
-        <item name="android:dialogTheme">@style/AppThemeDialog</item>
+        <item name="android:dialogTheme">@style/CptAppThemeDialog</item>
     </style>
 
-    <style name="AppThemeDialog" parent="android:Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" >
+    <style name="CptAppThemeDialog" parent="android:Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" >
         <!--Overwrite text colour from above-->
         <item name="android:textColor">@color/captains_yellow</item>
 

@@ -1,14 +1,10 @@
 package uk.ac.abertay.forbes.assessment;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,10 +12,10 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Telephony;
 import android.support.v4.content.ContextCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.List;
@@ -41,10 +37,32 @@ public class Service_Record extends IntentService {
 
     final Handler ticker = new Handler();
 
-    String gpsProv;
-//    SmsReceiver smsReceiver = null;
-//    CallReceiver callReceiver = null;
+    SmsReceiver smsReceiver = null;
+    CallReceiver callReceiver = null;
     LocationManager locationManager = null;
+    LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d(TAG, "Location Update - " + location.getLatitude() + ", " + location.getLongitude());
+            dh.newActivity(db, 0, "{\n\t\"lat-float\":" + location.getLatitude()
+                    + ",\n\t\"long-float\":" + location.getLongitude() + "\n}");
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+            Log.d(TAG, "Status change for GPS: " + s);
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+            Log.d(TAG, "GPS Provider Enabled: " + s);
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+            Log.d(TAG, "GPS Provider Disabled: " + s);
+        }
+    };
 
     Runnable waitCode = new Runnable() {
         @Override
@@ -53,34 +71,13 @@ public class Service_Record extends IntentService {
 
             ttl--;
 
-            if (gps && ContextCompat.checkSelfPermission(recordingScreen.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == 0)
-            {
-                if ((power_saving_ptr.value ? ttl * 2 : ttl)
-                        % gps_wait == 0)
-                {
-                    Location meme = locationManager.getLastKnownLocation(gpsProv);
-
-                    if (meme == null)
-                    {
-                        gps = false;
-                        Toast.makeText(recordingScreen, "Unable to fetch GPS location", Toast.LENGTH_SHORT).show();
-                    }
-                    else
-                    {
-                        Log.d(TAG, "LOCATION EXAMPLE - " + meme.getLatitude() + ", " + meme.getLongitude());
-
-                        dh.newActivity(db, 0, "{\n\t\"lat-float\":" + meme.getLatitude()
-                                + ",\n\t\"long-float\":" + meme.getLongitude() + "\n}");
-                    }
-
-
-                }
-            }
-
-            if (ttl > 0)
-                ticker.postDelayed(this, 5000); // TODO FIND 5000 REPLACE WITH 60000
+            if (ttl >= 0)
+                ticker.postDelayed(this, 60000
+                ); // TODO FIND 60000
+                // REPLACE WITH 60000
             else {
                 recordingScreen.recordingComplete();
+                stopPls();
             }
         }
     };
@@ -138,65 +135,63 @@ public class Service_Record extends IntentService {
     public void setupListeners () {
         // Start listeners
         Log.d(TAG, "Starting Listeners");
-        if (gps) {
-            Log.d(TAG, "GPS");
-            locationManager = (LocationManager) recordingScreen.getSystemService(LOCATION_SERVICE);
-            List <String> providers = locationManager.getProviders(true);
 
-            for (String provider: providers) {
-                if (!provider.equals("passive")) {
-                    gpsProv = provider;
+
+        if(gps && ContextCompat.checkSelfPermission(recordingScreen.getApplicationContext(),
+                    Manifest.permission.ACCESS_FINE_LOCATION) == 0)
+        {
+            locationManager = (LocationManager) recordingScreen.getSystemService(LOCATION_SERVICE);
+            List<String> providers = locationManager.getProviders(true);
+
+            for (String provider:
+                 providers) {
+                if (!provider.equals(LocationManager.PASSIVE_PROVIDER))
+                {
+                    locationManager.requestLocationUpdates(provider, gps_wait, 15, locationListener);
                     break;
                 }
             }
 
-            if (gpsProv != null && ContextCompat.checkSelfPermission(recordingScreen.getApplicationContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION) == 0) {
-                Log.d(TAG, "LOCATION EXAMPLE - " + locationManager.getLastKnownLocation(gpsProv).getAccuracy() + "m Accuracy");
-            } else {
-                Log.d(TAG, "No provider for GPS");
-                Toast.makeText(recordingScreen, "GPS is unavailable", Toast.LENGTH_SHORT).show();
-
-                gps = false;
-                Button btn_power_savings = recordingScreen.findViewById(R.id.btn_power_savings);
-                btn_power_savings.setVisibility(View.GONE); // All this was doing was turning off GPS
-            }
         }
 
-        if (call || sms)
-            Toast.makeText(recordingScreen, "Call and Text Recording is currently unavailable", Toast.LENGTH_LONG).show();
-//
-//        if (call) {
-//            Log.d(TAG, "Starting Calls");
-//            callReceiver = new CallReceiver();
-//            callReceiver.setListener(new CallReceiver.Listener() {
-//                @Override
-//                public void onCallReceived(String number, Boolean outbound, Date start) {
-//                    if (start != null)
-//                    {
-//                        dh.newActivity(db, 2,"{\n\t\"contact\":\"" + number + "\",\n\t\"outbound\":" + outbound.toString() + "\n\t\"start\":\"" + start.toString() + "\"\n}");
-//                    }
-//                    else
-//                    {
-//                        dh.newActivity(db, 2,"{\n\t\"contact\":\"" + number + "\",\n\t\"outbound\":" + outbound.toString() + "\n\t\"start\":\"none\"\n}");
-//                    }
-//                }
-//            });
-//        }
-//
-//        if (sms) {
-//            Log.d(TAG, "Starting Texts");
-//            smsReceiver = new SmsReceiver();
-//            smsReceiver.setListener(new SmsReceiver.Listener() {
-//                @Override
-//                public void onTextReceived(String sender, String text) {
-//                    Log.d("SmsReceiver", "senderNum: " + sender + "; message: " + text);
-//                    dh.newActivity(db, 2,"{\n\t\"contact\":\"" + sender + "\",\n\t\"outbound\":false\n\t\"content\":\"" + text + "\"\n}");
-//                }
-//            });
-//
-//            registerReceiver(smsReceiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION));
-//        }
+        if (call) {
+            Log.d(TAG, "Starting Calls");
+            callReceiver = new CallReceiver();
+            callReceiver.setListener(new CallReceiver.Listener() {
+                @Override
+                public void onCallReceived(String contact, Boolean outbound, String start) {
+
+
+                    Log.d("Call Received", "senderNum: " + contact + " ended. Started at " + start);
+//                    String formattingTimestamp = start.toString().substring(start.toString().length()-1)+
+//                            start.toString().substring(9)
+//                                    +(!start.toString().substring(10).equals(" ") ? start.toString().substring(10)+" ": " ")
+//                                    + ;
+
+                    dh.newActivity(db, 1,"{\n\t\"contact\":\"" + contact + "\",\n\t\"outbound\":" + outbound.toString() + ",\n\t\"start\":\"" + start + "\"\n}");
+                }
+            });
+            recordingScreen.registerReceiver(callReceiver, new IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED));
+            recordingScreen.registerReceiver(callReceiver, new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL));
+        }
+
+        if (sms) {
+            Log.d(TAG, "Starting Texts");
+            smsReceiver = new SmsReceiver();
+            smsReceiver.setListener(new SmsReceiver.Listener() {
+                @Override
+                public void onTextReceived(String contact, String text) {
+                    Log.d("SmsReceiver", "senderNum: " + contact + "; message: " + text);
+
+                    if (!contact.equals(""))
+                        dh.newActivity(db, 2,"{\n\t\"contact\":\"" + contact + "\",\n\t\"outbound\":false,\n\t\"content\":\"" + text + "\"\n}");
+                    else
+                        dh.newActivity(db, 2,"{\n\t\"contact\":\"" + contact + "\",\n\t\"outbound\":true,\n\t\"content\":\"" + text + "\"\n}");
+                }
+            });
+
+            recordingScreen.registerReceiver(smsReceiver, new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION));
+        }
     }
 
     @Override
@@ -210,7 +205,8 @@ public class Service_Record extends IntentService {
         dh.makeNewLog(db, intent.getExtras().getString("logname"), this);
 
         // Start Runnable
-        ticker.postDelayed(waitCode, 5000);
+        ticker.postDelayed(waitCode, 60000
+        );
 
         // Service Run successfully
         Log.d(TAG, "Successful run");
@@ -235,8 +231,10 @@ public class Service_Record extends IntentService {
     public void stopPls() {
         Log.d("Record Service", "Stopping Service - Since you asked so nicely");
         ticker.removeCallbacks(waitCode);
-//        mNM.cancel(R.string.app_name);
-//        if (sms) unregisterReceiver(smsReceiver);
+        if (gps) locationManager.removeUpdates(locationListener);
+        if (call) recordingScreen.unregisterReceiver(callReceiver);
+        if (sms) recordingScreen.unregisterReceiver(smsReceiver);
+
         super.stopSelf();
     }
 }
